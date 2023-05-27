@@ -121,7 +121,7 @@ func (p *Plugin) Exec() error {
 		return err
 	}
 
-	tpl, err := NewTemplateByString(string(format), GetAllEnviroment())
+	tpl, err := NewTemplate(string(format), GetAllEnviroment())
 	if err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func (p *Plugin) Exec() error {
 
 	// 3. Decode YAML manifest into unstructured.Unstructured
 	obj := &unstructured.Unstructured{}
-	_, gvk, err := decUnstructured.Decode([]byte(tpl), nil, obj)
+	_, gvk, err := decUnstructured.Decode(tpl, nil, obj)
 	if err != nil {
 		return err
 	}

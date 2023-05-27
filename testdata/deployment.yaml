@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .app_name }}
+  name: {{ .envs.app_name }}
   namespace: {{ .namespace }}
   labels:
-    app: {{ .app_name }}
+    app: {{ .envs.app_name }}
 spec:
   selector:
     matchLabels:
-      app: {{ .app_name }}
+      app: {{ .envs.app_name }}
   template:
     metadata:
-      name: {{ .app_name }}
+      name: {{ .envs.app_name }}
       labels:
-        app: {{ .app_name }}
+        app: {{ .envs.app_name }}
     spec:
       containers:
-        - name: {{ .app_name }}
+        - name: {{ .envs.app_name }}
           image: nginx:latest
           imagePullPolicy: IfNotPresent
           ports:

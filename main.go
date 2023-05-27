@@ -37,18 +37,18 @@ func main() {
 	app.Flags = []cli.Flag{
 		&cli.StringFlag{
 			Name:    "server",
-			Usage:   "kubernetes server",
+			Usage:   "Server is the address of the kubernetes cluster (https://hostname:port).",
 			EnvVars: []string{"PLUGIN_SERVER", "INPUT_SERVER"},
 			Value:   "us-east-1",
 		},
 		&cli.BoolFlag{
 			Name:    "skip-tls",
-			Usage:   "Skip TLS verify",
+			Usage:   "InsecureSkipTLSVerify skips the validity check for the server's certificate.",
 			EnvVars: []string{"PLUGIN_SKIP_TLS_VERIFY", "INPUT_SKIP_TLS_VERIFY"},
 		},
 		&cli.StringFlag{
 			Name:    "ca-cert",
-			Usage:   "ca cert raw content",
+			Usage:   "CertificateAuthorityData contains PEM-encoded certificate authority certificates.",
 			EnvVars: []string{"PLUGIN_CA_CERT", "INPUT_CA_CERT"},
 		},
 		&cli.StringFlag{
@@ -63,7 +63,7 @@ func main() {
 		},
 		&cli.StringFlag{
 			Name:    "proxy-url",
-			Usage:   "support proxy url",
+			Usage:   "URLs with http, https, and socks5",
 			EnvVars: []string{"PLUGIN_PROXY_URL", "INPUT_PROXY_URL"},
 		},
 	}

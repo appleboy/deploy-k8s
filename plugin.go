@@ -174,15 +174,18 @@ func (p *Plugin) Exec() error {
 	// 7. Create or Update the object with SSA
 	//     types.ApplyPatchType indicates SSA.
 	//     FieldManager specifies the field owner ID.
-	engine2, err := dr.Apply(context.Background(), obj.GetName(), obj, metav1.ApplyOptions{
+	engine, err := dr.Apply(context.Background(), obj.GetName(), obj, metav1.ApplyOptions{
 		FieldManager: "sample-controller",
 	})
+	if err != nil {
+		return err
+	}
 
 	log.Printf("apiVersion: %#v", gvk.GroupVersion().String())
 	log.Printf("kind: %#v", gvk.Kind)
-	log.Printf("namespace: %#v", engine2.GetNamespace())
-	log.Printf("name: %#v", engine2.GetName())
-	log.Printf("%#v", engine2.GetLabels())
+	log.Printf("namespace: %#v", engine.GetNamespace())
+	log.Printf("name: %#v", engine.GetName())
+	log.Printf("%#v", engine.GetLabels())
 
 	return nil
 }

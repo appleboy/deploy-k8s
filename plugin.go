@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 )
@@ -39,10 +41,26 @@ func (p *Plugin) Exec() error {
 	if err != nil {
 		return err
 	}
-	_, err = kubernetes.NewForConfig(restConfig)
+	clientset, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return err
 	}
+
+	// get pods in all the namespaces by omitting namespace
+	// Or specify namespace to get pods in particular namespace
+	pods, err := clientset.
+		CoreV1().
+		Pods(p.Config.Namespace).
+		List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		panic(err.Error())
+	}
+	namespace := "All"
+	if p.Config.Namespace != "" {
+		namespace = p.Config.Namespace
+	}
+	fmt.Printf("[%s] There are %d pods in the cluster\n", namespace, len(pods.Items))
+
 	_, err = dynamic.NewForConfig(restConfig)
 	if err != nil {
 		return err

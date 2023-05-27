@@ -39,7 +39,6 @@ func main() {
 			Name:    "server",
 			Usage:   "Server is the address of the kubernetes cluster (https://hostname:port).",
 			EnvVars: []string{"PLUGIN_SERVER", "INPUT_SERVER"},
-			Value:   "us-east-1",
 		},
 		&cli.BoolFlag{
 			Name:    "skip-tls",

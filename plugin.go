@@ -3,11 +3,53 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"regexp"
+	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 )
+
+var (
+	reDronePlugin  = regexp.MustCompile(`^PLUGIN_(.*)=(.*)`)
+	reDroneVar     = regexp.MustCompile(`^DRONE_(.*)=(.*)`)
+	reGitHubAction = regexp.MustCompile(`^INPUT_(.*)=(.*)`)
+	reGitHubVar    = regexp.MustCompile(`^GITHUB_(.*)=(.*)`)
+)
+
+// GetAllEnviroment returns all environment variables.
+func GetAllEnviroment() map[string]string {
+	envs := make(map[string]string)
+	for _, e := range os.Environ() {
+		// Drone CI
+		if reDronePlugin.MatchString(e) {
+			matches := reDronePlugin.FindStringSubmatch(e)
+			key := strings.ToLower(matches[1])
+			envs[key] = matches[2]
+		}
+		// Drone CI
+		if reDroneVar.MatchString(e) {
+			matches := reDroneVar.FindStringSubmatch(e)
+			key := strings.ToLower(matches[1])
+			envs[key] = matches[2]
+		}
+		// GitHub Actions
+		if reGitHubAction.MatchString(e) {
+			matches := reGitHubAction.FindStringSubmatch(e)
+			key := strings.ToLower(matches[1])
+			envs[key] = matches[2]
+		}
+		// GitHub Actions
+		if reGitHubVar.MatchString(e) {
+			matches := reGitHubVar.FindStringSubmatch(e)
+			key := strings.ToLower(matches[1])
+			envs[key] = matches[2]
+		}
+	}
+	return envs
+}
 
 type (
 	// Config for the kube server.

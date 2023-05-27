@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/base64"
 	"fmt"
-	"log"
 
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -20,10 +19,7 @@ func NewKubeConfig(cfg *Config) (*rest.Config, error) {
 
 	if cfg.SkipTLS == true {
 		clusterConfig.InsecureSkipTLSVerify = true
-		log.Println("InsecureSkipTLSVerify flag set")
-	}
-
-	if cfg.CaCert != "" {
+	} else {
 		ca, err := base64.StdEncoding.DecodeString(cfg.CaCert)
 		if err != nil {
 			return nil, fmt.Errorf("possible corrupted CA, or not base64 encoded: %s", err)

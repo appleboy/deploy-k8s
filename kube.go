@@ -31,6 +31,11 @@ func NewKubeConfig(cfg *Config) (*rest.Config, error) {
 		clusterConfig.CertificateAuthorityData = ca
 	}
 
+	// Add proxy support
+	if cfg.ProxyURL != "" {
+		clusterConfig.ProxyURL = cfg.ProxyURL
+	}
+
 	kubeCfg.Clusters["default"] = &clusterConfig
 	kubeCfg.AuthInfos["default"] = &clientcmdapi.AuthInfo{
 		Token: cfg.Token,

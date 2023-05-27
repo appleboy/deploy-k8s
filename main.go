@@ -61,6 +61,11 @@ func main() {
 			Usage:   "kubernetes namespace",
 			EnvVars: []string{"PLUGIN_NAMESPACE", "INPUT_NAMESPACE"},
 		},
+		&cli.StringFlag{
+			Name:    "proxy-url",
+			Usage:   "support proxy url",
+			EnvVars: []string{"PLUGIN_PROXY_URL", "INPUT_PROXY_URL"},
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -76,6 +81,7 @@ func run(c *cli.Context) error {
 			CaCert:    c.String("ca-cert"),
 			Token:     c.String("token"),
 			Namespace: c.String("namespace"),
+			ProxyURL:  c.String("proxy-url"),
 		},
 	}
 

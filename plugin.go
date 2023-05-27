@@ -13,6 +13,7 @@ type (
 		CaCert    string
 		Token     string
 		Namespace string
+		ProxyURL  string
 	}
 
 	// Plugin values.

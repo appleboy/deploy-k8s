@@ -18,10 +18,10 @@ func TestGetAllEnviroment(t *testing.T) {
 
 	// Assert the expected values
 	expected := map[string]string{
-		"var1": "value1",
-		"var2": "value2",
-		"var3": "value3",
-		"var4": "value4",
+		"var1":        "value1",
+		"drone_var2":  "value2",
+		"var3":        "value3",
+		"github_var4": "value4",
 	}
 	for key, expectedValue := range expected {
 		actualValue, ok := result[key]

@@ -14,9 +14,9 @@ import (
 
 var (
 	reDronePlugin  = regexp.MustCompile(`^PLUGIN_(.*)=(.*)`)
-	reDroneVar     = regexp.MustCompile(`^DRONE_(.*)=(.*)`)
+	reDroneVar     = regexp.MustCompile(`^(DRONE_.*)=(.*)`)
 	reGitHubAction = regexp.MustCompile(`^INPUT_(.*)=(.*)`)
-	reGitHubVar    = regexp.MustCompile(`^GITHUB_(.*)=(.*)`)
+	reGitHubVar    = regexp.MustCompile(`^(GITHUB_.*)=(.*)`)
 )
 
 // GetAllEnviroment returns all environment variables.
@@ -28,24 +28,28 @@ func GetAllEnviroment() map[string]string {
 			matches := reDronePlugin.FindStringSubmatch(e)
 			key := strings.ToLower(matches[1])
 			envs[key] = matches[2]
+			continue
 		}
 		// Drone CI
 		if reDroneVar.MatchString(e) {
 			matches := reDroneVar.FindStringSubmatch(e)
 			key := strings.ToLower(matches[1])
 			envs[key] = matches[2]
+			continue
 		}
 		// GitHub Actions
 		if reGitHubAction.MatchString(e) {
 			matches := reGitHubAction.FindStringSubmatch(e)
 			key := strings.ToLower(matches[1])
 			envs[key] = matches[2]
+			continue
 		}
 		// GitHub Actions
 		if reGitHubVar.MatchString(e) {
 			matches := reGitHubVar.FindStringSubmatch(e)
 			key := strings.ToLower(matches[1])
 			envs[key] = matches[2]
+			continue
 		}
 	}
 	return envs

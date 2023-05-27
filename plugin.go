@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 )
@@ -23,6 +25,16 @@ type (
 )
 
 func (p *Plugin) Exec() error {
+	if p.Config.Server == "" {
+		return fmt.Errorf("server is required")
+	}
+	if p.Config.Token == "" {
+		return fmt.Errorf("token is required")
+	}
+	if p.Config.CaCert == "" {
+		return fmt.Errorf("ca_cert is required")
+	}
+
 	restConfig, err := NewKubeConfig(p.Config)
 	if err != nil {
 		return err

@@ -3,6 +3,7 @@ module github.com/appleboy/deploy-k8s
 go 1.20
 
 require (
+	github.com/joho/godotenv v1.5.1
 	github.com/urfave/cli/v2 v2.25.3
 	k8s.io/client-go v0.27.2
 )

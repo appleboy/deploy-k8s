@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2"
 )
 
@@ -15,6 +17,11 @@ var (
 )
 
 func main() {
+	// Load env-file if it exists first
+	if filename, found := os.LookupEnv("PLUGIN_ENV_FILE"); found {
+		_ = godotenv.Load(filename)
+	}
+
 	app := cli.NewApp()
 	app.Name = "Deploy Kubernetes plugin"
 	app.Usage = "Deploy Kubernetes plugin"
@@ -62,7 +69,15 @@ func main() {
 }
 
 func run(c *cli.Context) error {
-	plugin := &Plugin{}
+	plugin := &Plugin{
+		Config: &Config{
+			Server:    c.String("server"),
+			SkipTLS:   c.Bool("skip-tls"),
+			CaCert:    c.String("ca-cert"),
+			Token:     c.String("token"),
+			Namespace: c.String("namespace"),
+		},
+	}
 
 	return plugin.Exec()
 }

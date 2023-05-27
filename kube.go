@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"log"
 
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 	"k8s.io/client-go/util/flowcontrol"
 )
 
-func creatKubeConfig(cfg *Config) (*kubernetes.Clientset, error) {
+// NewKubeClient returns a new Kubernetes client.
+func NewKubeConfig(cfg *Config) (*rest.Config, error) {
 	kubeCfg := clientcmdapi.NewConfig()
 	clusterConfig := clientcmdapi.Cluster{
 		Server: cfg.Server,
@@ -50,5 +51,5 @@ func creatKubeConfig(cfg *Config) (*kubernetes.Clientset, error) {
 	}
 
 	actualCfg.RateLimiter = flowcontrol.NewTokenBucketRateLimiter(1000, 1000)
-	return kubernetes.NewForConfig(actualCfg)
+	return actualCfg, nil
 }

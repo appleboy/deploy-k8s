@@ -65,6 +65,11 @@ func main() {
 			Usage:   "URLs with http, https, and socks5",
 			EnvVars: []string{"PLUGIN_PROXY_URL", "INPUT_PROXY_URL"},
 		},
+		&cli.StringFlag{
+			Name:    "template",
+			Usage:   "template file",
+			EnvVars: []string{"PLUGIN_TEMPLATE", "INPUT_TEMPLATE"},
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -81,6 +86,7 @@ func run(c *cli.Context) error {
 			Token:     c.String("token"),
 			Namespace: c.String("namespace"),
 			ProxyURL:  c.String("proxy-url"),
+			Template:  c.String("template"),
 		},
 	}
 

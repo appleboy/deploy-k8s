@@ -3,13 +3,20 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
 	"strings"
 
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
+	"k8s.io/client-go/discovery"
+	memory "k8s.io/client-go/discovery/cached"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/restmapper"
 )
 
 var (
@@ -18,10 +25,11 @@ var (
 	reGitHubAction = regexp.MustCompile(`^INPUT_(.*)=(.*)`)
 	reGitHubVar    = regexp.MustCompile(`^(GITHUB_.*)=(.*)`)
 )
+var decUnstructured = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 // GetAllEnviroment returns all environment variables.
-func GetAllEnviroment() map[string]string {
-	envs := make(map[string]string)
+func GetAllEnviroment() map[string]any {
+	envs := make(map[string]any)
 	for _, e := range os.Environ() {
 		// Drone CI
 		if reDronePlugin.MatchString(e) {
@@ -64,6 +72,7 @@ type (
 		Token     string
 		Namespace string
 		ProxyURL  string
+		Template  string
 	}
 
 	// Plugin values.
@@ -107,9 +116,73 @@ func (p *Plugin) Exec() error {
 	}
 	fmt.Printf("[%s] There are %d pods in the cluster\n", namespace, len(pods.Items))
 
-	_, err = dynamic.NewForConfig(restConfig)
+	format, err := os.ReadFile(p.Config.Template)
 	if err != nil {
 		return err
 	}
+
+	tpl, err := NewTemplateByString(string(format), GetAllEnviroment())
+	if err != nil {
+		return err
+	}
+
+	// 1. Prepare a RESTMapper to find GVR
+	dc, err := discovery.NewDiscoveryClientForConfig(restConfig)
+	if err != nil {
+		return err
+	}
+	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
+
+	dyn, err := dynamic.NewForConfig(restConfig)
+	if err != nil {
+		return err
+	}
+
+	// 3. Decode YAML manifest into unstructured.Unstructured
+	obj := &unstructured.Unstructured{}
+	_, gvk, err := decUnstructured.Decode([]byte(tpl), nil, obj)
+	if err != nil {
+		return err
+	}
+
+	// 4. Find GVR
+	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		return err
+	}
+
+	// 5. Obtain REST interface for the GVR
+	var dr dynamic.ResourceInterface
+	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
+		if obj.GetNamespace() == "" {
+			if p.Config.Namespace == "" {
+				return fmt.Errorf(
+					"apply resource failed: namespace must be defined, apiVersion=%s, kind=%s, name=%s",
+					gvk.GroupVersion().String(), gvk.Kind, obj.GetName(),
+				)
+			}
+			// set default namespace
+			obj.SetNamespace(p.Config.Namespace)
+		}
+		// namespaced resources should specify the namespace
+		dr = dyn.Resource(mapping.Resource).Namespace(obj.GetNamespace())
+	} else {
+		// for cluster-wide resources
+		dr = dyn.Resource(mapping.Resource)
+	}
+
+	// 7. Create or Update the object with SSA
+	//     types.ApplyPatchType indicates SSA.
+	//     FieldManager specifies the field owner ID.
+	engine2, err := dr.Apply(context.Background(), obj.GetName(), obj, metav1.ApplyOptions{
+		FieldManager: "sample-controller",
+	})
+
+	log.Printf("apiVersion: %#v", gvk.GroupVersion().String())
+	log.Printf("kind: %#v", gvk.Kind)
+	log.Printf("namespace: %#v", engine2.GetNamespace())
+	log.Printf("name: %#v", engine2.GetName())
+	log.Printf("%#v", engine2.GetLabels())
+
 	return nil
 }

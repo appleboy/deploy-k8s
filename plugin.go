@@ -96,25 +96,10 @@ func (p *Plugin) Exec() error {
 	if err != nil {
 		return err
 	}
-	clientset, err := kubernetes.NewForConfig(restConfig)
+	_, err = kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return err
 	}
-
-	// get pods in all the namespaces by omitting namespace
-	// Or specify namespace to get pods in particular namespace
-	pods, err := clientset.
-		CoreV1().
-		Pods(p.Config.Namespace).
-		List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		panic(err.Error())
-	}
-	namespace := "All"
-	if p.Config.Namespace != "" {
-		namespace = p.Config.Namespace
-	}
-	fmt.Printf("[%s] There are %d pods in the cluster\n", namespace, len(pods.Items))
 
 	format, err := os.ReadFile(p.Config.Template)
 	if err != nil {

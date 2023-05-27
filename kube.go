@@ -7,7 +7,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-	"k8s.io/client-go/util/flowcontrol"
 )
 
 // NewKubeClient returns a new Kubernetes client.
@@ -32,9 +31,14 @@ func NewKubeConfig(cfg *Config) (*rest.Config, error) {
 		clusterConfig.ProxyURL = cfg.ProxyURL
 	}
 
+	token, err := base64.StdEncoding.DecodeString(cfg.Token)
+	if err != nil {
+		return nil, fmt.Errorf("invaild token, or not base64 encoded: %s", err)
+	}
+
 	kubeCfg.Clusters["default"] = &clusterConfig
 	kubeCfg.AuthInfos["default"] = &clientcmdapi.AuthInfo{
-		Token: cfg.Token,
+		Token: string(token),
 	}
 	ctx := &clientcmdapi.Context{
 		Cluster:  "default",
@@ -51,6 +55,5 @@ func NewKubeConfig(cfg *Config) (*rest.Config, error) {
 		return nil, fmt.Errorf("client builder client config; %w", err)
 	}
 
-	actualCfg.RateLimiter = flowcontrol.NewTokenBucketRateLimiter(1000, 1000)
 	return actualCfg, nil
 }

@@ -1,7 +1,6 @@
 package template
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -125,7 +124,7 @@ func TestParseSet(t *testing.T) {
 		"ENV_VAR": "test",
 	}
 
-	tempDir, err := ioutil.TempDir("", "test-templates")
+	tempDir, err := os.MkdirTemp("", "test-templates")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
@@ -139,7 +138,7 @@ metadata:
 data:
   key1: {{ .ENV_VAR }}
 `)
-	err = ioutil.WriteFile(filepath.Join(tempDir, "template1.yaml"), template1, 0o644)
+	err = os.WriteFile(filepath.Join(tempDir, "template1.yaml"), template1, 0o644)
 	if err != nil {
 		t.Fatalf("Failed to write template1.yaml: %v", err)
 	}
@@ -165,7 +164,7 @@ kind: ServiceAccount
 metadata:
   name: drone-ci
 `)
-	err = ioutil.WriteFile(filepath.Join(tempDir, "template2.yaml"), template2, 0o644)
+	err = os.WriteFile(filepath.Join(tempDir, "template2.yaml"), template2, 0o644)
 	if err != nil {
 		t.Fatalf("Failed to write template2.yaml: %v", err)
 	}

@@ -3,6 +3,8 @@ package template
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -10,16 +12,18 @@ import (
 	"text/template"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	pkgruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
+	serializeryaml "k8s.io/apimachinery/pkg/runtime/serializer/yaml"
+	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
-var decUnstructured = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+var serializer = serializeryaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 type KubeObject struct {
 	TplData string
 	TplPath string
-	GVK     *schema.GroupVersionKind
+	GVK     schema.GroupVersionKind
 	Obj     *unstructured.Unstructured
 }
 
@@ -113,25 +117,49 @@ func ParseSet(templates []string, envMap map[string]any) ([]*KubeObject, error) 
 		if err != nil {
 			return nil, err
 		}
-		obj := &unstructured.Unstructured{}
-		_, gvk, err := decUnstructured.Decode(tpl, nil, obj)
+
+		objs, err := ParseObject(tpl)
 		if err != nil {
 			return nil, err
 		}
 
-		// 6. Marshal object into JSON
-		data, err := obj.MarshalJSON()
-		if err != nil {
-			return nil, err
-		}
+		for _, obj := range objs {
+			objCopy := obj.DeepCopy()
+			data, err := objCopy.MarshalJSON()
+			if err != nil {
+				return nil, err
+			}
 
-		objects = append(objects, &KubeObject{
-			TplData: string(data),
-			TplPath: template,
-			GVK:     gvk,
-			Obj:     obj,
-		})
+			objects = append(objects, &KubeObject{
+				TplData: string(data),
+				TplPath: template,
+				GVK:     objCopy.GroupVersionKind(),
+				Obj:     objCopy,
+			})
+		}
 	}
 
 	return objects, nil
+}
+
+// ParseObject returns a list of unstructured objects.
+func ParseObject(data []byte) ([]unstructured.Unstructured, error) {
+	var result []unstructured.Unstructured
+	decoder := utilyaml.NewYAMLOrJSONDecoder(bytes.NewReader(data), 256)
+	for {
+		var rawObj pkgruntime.RawExtension
+		if err := decoder.Decode(&rawObj); err != nil {
+			if err == io.EOF {
+				break
+			}
+			return nil, fmt.Errorf("decode data to raw object failed: %v", err)
+		}
+
+		var obj unstructured.Unstructured
+		if err := pkgruntime.DecodeInto(serializer, rawObj.Raw, &obj); err != nil {
+			return nil, fmt.Errorf("decode raw object failed: %v", err)
+		}
+		result = append(result, obj)
+	}
+	return result, nil
 }

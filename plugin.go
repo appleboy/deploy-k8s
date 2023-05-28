@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/appleboy/deploy-k8s/config"
 	"github.com/appleboy/deploy-k8s/kube"
 	"github.com/appleboy/deploy-k8s/template"
 
+	"github.com/rs/zerolog/log"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
@@ -48,7 +48,7 @@ func (p *Plugin) Exec() error {
 		if err != nil {
 			return err
 		}
-		log.Println("Generated kube config file:", p.Config.Output)
+		log.Info().Str("file", p.Config.Output).Msg("Generated kube config file")
 		return nil
 	}
 
@@ -116,11 +116,22 @@ func (p *Plugin) Exec() error {
 			return err
 		}
 
-		log.Printf("filePath: %#v", v.TplPath)
-		log.Printf("apiVersion: %#v", v.GVK.GroupVersion().String())
-		log.Printf("kind: %#v", v.GVK.Kind)
-		log.Printf("namespace: %#v", obj.GetNamespace())
-		log.Printf("name: %#v", obj.GetName())
+		l := log.With().
+			Str("apiVersion", v.GVK.GroupVersion().String()).
+			Str("kind", v.GVK.Kind).
+			Str("namespace", obj.GetNamespace()).
+			Str("name", obj.GetName()).
+			Logger()
+
+		if p.Config.Debug {
+			l.Debug().
+				Str("template", v.TplPath).
+				Msg("show resource")
+			fmt.Printf("%s", v.PrettyString())
+		}
+
+		l.Info().
+			Msg("apply resource success")
 	}
 
 	return nil

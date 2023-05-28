@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"strconv"
 	"time"
@@ -10,6 +9,9 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/mattn/go-isatty"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 )
 
@@ -22,6 +24,26 @@ func main() {
 	// Load env-file if it exists first
 	if filename, found := os.LookupEnv("PLUGIN_ENV_FILE"); found {
 		_ = godotenv.Load(filename)
+	}
+
+	isTerm := isatty.IsTerminal(os.Stdout.Fd())
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	log.Logger = log.Output(
+		zerolog.ConsoleWriter{
+			Out:     os.Stderr,
+			NoColor: !isTerm,
+		},
+	)
+	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
+		short := file
+		for i := len(file) - 1; i > 0; i-- {
+			if file[i] == '/' {
+				short = file[i+1:]
+				break
+			}
+		}
+		file = short
+		return file + ":" + strconv.Itoa(line)
 	}
 
 	app := cli.NewApp()
@@ -95,14 +117,24 @@ func main() {
 			EnvVars: []string{"PLUGIN_CONTEXT_NAME", "INPUT_CONTEXT_NAME"},
 			Value:   "default",
 		},
+		&cli.BoolFlag{
+			Name:    "debug",
+			Usage:   "enable debug mode",
+			EnvVars: []string{"PLUGIN_DEBUG", "INPUT_DEBUG"},
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("can't run app")
 	}
 }
 
 func run(c *cli.Context) error {
+	if c.Bool("debug") {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		log.Logger = log.With().Caller().Logger()
+	}
+
 	plugin := &Plugin{
 		Config: &config.K8S{
 			Server:       c.String("server"),
@@ -115,6 +147,7 @@ func run(c *cli.Context) error {
 			ClusterName:  c.String("cluster-name"),
 			AuthInfoName: c.String("authinfo-name"),
 			ContextName:  c.String("context-name"),
+			Debug:        c.Bool("debug"),
 		},
 		AuthInfo: &config.AuthInfo{
 			Token: c.String("token"),

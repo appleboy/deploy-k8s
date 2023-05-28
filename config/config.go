@@ -10,6 +10,7 @@ type (
 		ProxyURL  string
 		Templates []string
 		Output    string
+		Debug     bool
 
 		// kube config file
 		ClusterName  string

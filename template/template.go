@@ -2,6 +2,7 @@ package template
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -16,10 +17,16 @@ import (
 var decUnstructured = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 type KubeObject struct {
-	Tpl     string
+	TplData string
 	TplPath string
 	GVK     *schema.GroupVersionKind
 	Obj     *unstructured.Unstructured
+}
+
+func (k *KubeObject) PrettyString() string {
+	var prettyJSON bytes.Buffer
+	_ = json.Indent(&prettyJSON, []byte(k.TplData), "", "  ")
+	return prettyJSON.String()
 }
 
 var (
@@ -112,8 +119,14 @@ func ParseSet(templates []string, envMap map[string]any) ([]*KubeObject, error) 
 			return nil, err
 		}
 
+		// 6. Marshal object into JSON
+		data, err := obj.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+
 		objects = append(objects, &KubeObject{
-			Tpl:     string(format),
+			TplData: string(data),
 			TplPath: template,
 			GVK:     gvk,
 			Obj:     obj,

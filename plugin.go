@@ -72,7 +72,7 @@ type (
 		Token     string
 		Namespace string
 		ProxyURL  string
-		Template  string
+		Templates []string
 	}
 
 	// Plugin values.
@@ -101,17 +101,6 @@ func (p *Plugin) Exec() error {
 		return err
 	}
 
-	format, err := os.ReadFile(p.Config.Template)
-	if err != nil {
-		return err
-	}
-
-	tpl, err := NewTemplate(string(format), GetAllEnviroment())
-	if err != nil {
-		return err
-	}
-
-	// 1. Prepare a RESTMapper to find GVR
 	dc, err := discovery.NewDiscoveryClientForConfig(restConfig)
 	if err != nil {
 		return err
@@ -123,54 +112,51 @@ func (p *Plugin) Exec() error {
 		return err
 	}
 
-	// 3. Decode YAML manifest into unstructured.Unstructured
-	obj := &unstructured.Unstructured{}
-	_, gvk, err := decUnstructured.Decode(tpl, nil, obj)
-	if err != nil {
-		return err
-	}
+	kubeObjs, err := ParseTemplateSet(p.Config.Templates, GetAllEnviroment())
 
-	// 4. Find GVR
-	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
-	if err != nil {
-		return err
-	}
-
-	// 5. Obtain REST interface for the GVR
-	var dr dynamic.ResourceInterface
-	if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
-		if obj.GetNamespace() == "" {
-			if p.Config.Namespace == "" {
-				return fmt.Errorf(
-					"apply resource failed: namespace must be defined, apiVersion=%s, kind=%s, name=%s",
-					gvk.GroupVersion().String(), gvk.Kind, obj.GetName(),
-				)
-			}
-			// set default namespace
-			obj.SetNamespace(p.Config.Namespace)
+	for _, v := range kubeObjs {
+		mapping, err := mapper.RESTMapping(v.GVK.GroupKind(), v.GVK.Version)
+		if err != nil {
+			return err
 		}
-		// namespaced resources should specify the namespace
-		dr = dyn.Resource(mapping.Resource).Namespace(obj.GetNamespace())
-	} else {
-		// for cluster-wide resources
-		dr = dyn.Resource(mapping.Resource)
-	}
 
-	// 7. Create or Update the object with SSA
-	//     types.ApplyPatchType indicates SSA.
-	//     FieldManager specifies the field owner ID.
-	engine, err := dr.Apply(context.Background(), obj.GetName(), obj, metav1.ApplyOptions{
-		FieldManager: "sample-controller",
-	})
-	if err != nil {
-		return err
-	}
+		var dr dynamic.ResourceInterface
+		if mapping.Scope.Name() == meta.RESTScopeNameNamespace {
+			if v.Obj.GetNamespace() == "" {
+				if p.Config.Namespace == "" {
+					return fmt.Errorf(
+						"apply resource failed: namespace must be defined, apiVersion=%s, kind=%s, name=%s",
+						v.GVK.GroupVersion().String(), v.GVK.Kind, v.Obj.GetName(),
+					)
+				}
+				// set default namespace
+				v.Obj.SetNamespace(p.Config.Namespace)
+			}
+			// namespaced resources should specify the namespace
+			dr = dyn.
+				Resource(mapping.Resource).
+				Namespace(v.Obj.GetNamespace())
+		} else {
+			// for cluster-wide resources
+			dr = dyn.Resource(mapping.Resource)
+		}
 
-	log.Printf("apiVersion: %#v", gvk.GroupVersion().String())
-	log.Printf("kind: %#v", gvk.Kind)
-	log.Printf("namespace: %#v", engine.GetNamespace())
-	log.Printf("name: %#v", engine.GetName())
-	log.Printf("%#v", engine.GetLabels())
+		obj, err := dr.Apply(
+			context.Background(),
+			v.Obj.GetName(),
+			v.Obj,
+			metav1.ApplyOptions{},
+		)
+		if err != nil {
+			return err
+		}
+
+		log.Printf("filePath: %#v", v.TplPath)
+		log.Printf("apiVersion: %#v", v.GVK.GroupVersion().String())
+		log.Printf("kind: %#v", v.GVK.Kind)
+		log.Printf("namespace: %#v", obj.GetNamespace())
+		log.Printf("name: %#v", obj.GetName())
+	}
 
 	return nil
 }

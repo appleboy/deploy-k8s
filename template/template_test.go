@@ -1,0 +1,57 @@
+package template
+
+import (
+	"os"
+	"testing"
+)
+
+func TestNewTemplate(t *testing.T) {
+	// Define test input
+	format := "Hello, {{ .envs.name }}! Today is {{ .envs.day }}."
+
+	data := map[string]interface{}{
+		"name": "John",
+		"day":  "Monday",
+	}
+
+	// Call the function being tested
+	result, err := NewTemplate(format, data)
+	// Check for errors
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
+	}
+
+	// Assert the expected result
+	expected := "Hello, John! Today is Monday."
+	if string(result) != expected {
+		t.Errorf("Expected result: %s, but got: %s", expected, result)
+	}
+}
+
+// TestGetAllEnviroment tests the GetAllEnviroment function.
+func TestGetAllEnviroment(t *testing.T) {
+	// Set up test environment variables
+	os.Setenv("PLUGIN_VAR1", "value1")
+	os.Setenv("DRONE_VAR2", "value2")
+	os.Setenv("INPUT_VAR3", "value3")
+	os.Setenv("GITHUB_VAR4", "value4")
+
+	// Call the function being tested
+	result := GetAllEnviroment()
+
+	// Assert the expected values
+	expected := map[string]string{
+		"var1":        "value1",
+		"drone_var2":  "value2",
+		"var3":        "value3",
+		"github_var4": "value4",
+	}
+	for key, expectedValue := range expected {
+		actualValue, ok := result[key]
+		if !ok {
+			t.Errorf("Expected key %s not found in the result", key)
+		} else if actualValue != expectedValue {
+			t.Errorf("Expected value %s for key %s, but got %s", expectedValue, key, actualValue)
+		}
+	}
+}

@@ -1,12 +1,14 @@
-package main
+package kube
 
 import (
 	"encoding/base64"
 	"testing"
+
+	"github.com/appleboy/deploy-k8s/config"
 )
 
 func TestNewKubeClientConfig(t *testing.T) {
-	cfg := &Config{
+	cfg := &config.K8S{
 		Server:    "https://my-kubernetes-api-server",
 		SkipTLS:   false,
 		CaCert:    base64.StdEncoding.EncodeToString([]byte("base64-encoded-ca-cert")),
@@ -15,7 +17,7 @@ func TestNewKubeClientConfig(t *testing.T) {
 		Namespace: "my-namespace",
 	}
 
-	kubeCfg, err := NewKubeClientConfig(cfg)
+	kubeCfg, err := NewClientConfig(cfg)
 	if err != nil {
 		t.Errorf("Error creating Kubernetes client config: %s", err)
 		return

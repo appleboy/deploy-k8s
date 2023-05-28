@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
-	"regexp"
-	"strings"
+
+	"github.com/appleboy/deploy-k8s/config"
+	"github.com/appleboy/deploy-k8s/kube"
+	"github.com/appleboy/deploy-k8s/template"
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,64 +18,10 @@ import (
 	"k8s.io/client-go/restmapper"
 )
 
-var (
-	reDronePlugin  = regexp.MustCompile(`^PLUGIN_(.*)=(.*)`)
-	reDroneVar     = regexp.MustCompile(`^(DRONE_.*)=(.*)`)
-	reGitHubAction = regexp.MustCompile(`^INPUT_(.*)=(.*)`)
-	reGitHubVar    = regexp.MustCompile(`^(GITHUB_.*)=(.*)`)
-)
-
-// GetAllEnviroment returns all environment variables.
-func GetAllEnviroment() map[string]any {
-	envs := make(map[string]any)
-	for _, e := range os.Environ() {
-		// Drone CI
-		if reDronePlugin.MatchString(e) {
-			matches := reDronePlugin.FindStringSubmatch(e)
-			key := strings.ToLower(matches[1])
-			envs[key] = matches[2]
-			continue
-		}
-		// Drone CI
-		if reDroneVar.MatchString(e) {
-			matches := reDroneVar.FindStringSubmatch(e)
-			key := strings.ToLower(matches[1])
-			envs[key] = matches[2]
-			continue
-		}
-		// GitHub Actions
-		if reGitHubAction.MatchString(e) {
-			matches := reGitHubAction.FindStringSubmatch(e)
-			key := strings.ToLower(matches[1])
-			envs[key] = matches[2]
-			continue
-		}
-		// GitHub Actions
-		if reGitHubVar.MatchString(e) {
-			matches := reGitHubVar.FindStringSubmatch(e)
-			key := strings.ToLower(matches[1])
-			envs[key] = matches[2]
-			continue
-		}
-	}
-	return envs
-}
-
 type (
-	// Config for the kube server.
-	Config struct {
-		Server    string
-		SkipTLS   bool
-		CaCert    string
-		Token     string
-		Namespace string
-		ProxyURL  string
-		Templates []string
-	}
-
 	// Plugin values.
 	Plugin struct {
-		Config *Config
+		Config *config.K8S
 	}
 )
 
@@ -89,7 +36,7 @@ func (p *Plugin) Exec() error {
 		return fmt.Errorf("ca_cert is required")
 	}
 
-	restConfig, err := NewKubeConfig(p.Config)
+	restConfig, err := kube.NewRestConfig(p.Config)
 	if err != nil {
 		return err
 	}
@@ -109,7 +56,7 @@ func (p *Plugin) Exec() error {
 		return err
 	}
 
-	kubeObjs, err := ParseTemplateSet(p.Config.Templates, GetAllEnviroment())
+	kubeObjs, err := template.ParseSet(p.Config.Templates, template.GetAllEnviroment())
 
 	for _, v := range kubeObjs {
 		mapping, err := mapper.RESTMapping(v.GVK.GroupKind(), v.GVK.Version)

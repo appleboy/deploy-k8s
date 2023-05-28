@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/appleboy/deploy-k8s/config"
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2"
@@ -79,7 +80,7 @@ func main() {
 
 func run(c *cli.Context) error {
 	plugin := &Plugin{
-		Config: &Config{
+		Config: &config.K8S{
 			Server:    c.String("server"),
 			SkipTLS:   c.Bool("skip-tls"),
 			CaCert:    c.String("ca-cert"),

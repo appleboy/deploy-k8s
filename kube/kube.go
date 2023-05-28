@@ -1,16 +1,17 @@
-package main
+package kube
 
 import (
 	"encoding/base64"
 	"fmt"
 
+	"github.com/appleboy/deploy-k8s/config"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 // NewKubeClientConfig returns a new Kubernetes client config.
-func NewKubeClientConfig(cfg *Config) (*clientcmdapi.Config, error) {
+func NewClientConfig(cfg *config.K8S) (*clientcmdapi.Config, error) {
 	kubeCfg := clientcmdapi.NewConfig()
 	clusterConfig := clientcmdapi.Cluster{
 		Server: cfg.Server,
@@ -53,9 +54,9 @@ func NewKubeClientConfig(cfg *Config) (*clientcmdapi.Config, error) {
 	return kubeCfg, nil
 }
 
-// NewKubeClient returns a new rest config.
-func NewKubeConfig(cfg *Config) (*rest.Config, error) {
-	kubeCfg, err := NewKubeClientConfig(cfg)
+// NewRestConfig returns a new rest config.
+func NewRestConfig(cfg *config.K8S) (*rest.Config, error) {
+	kubeCfg, err := NewClientConfig(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("new kube client config; %w", err)
 	}

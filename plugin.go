@@ -10,8 +10,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/client-go/discovery"
 	memory "k8s.io/client-go/discovery/cached"
 	"k8s.io/client-go/dynamic"
@@ -25,7 +23,6 @@ var (
 	reGitHubAction = regexp.MustCompile(`^INPUT_(.*)=(.*)`)
 	reGitHubVar    = regexp.MustCompile(`^(GITHUB_.*)=(.*)`)
 )
-var decUnstructured = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 // GetAllEnviroment returns all environment variables.
 func GetAllEnviroment() map[string]any {

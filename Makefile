@@ -1,5 +1,4 @@
 EXECUTABLE := deploy-k8s
-GOFMT ?= gofumpt -l
 GO ?= go
 GOFILES := $(shell find . -name "*.go" -type f)
 HAS_GO = $(shell hash $(GO) > /dev/null 2>&1 && echo "GO" || echo "NOGO" )

@@ -37,19 +37,19 @@ func NewClientConfig(cfg *config.K8S) (*clientcmdapi.Config, error) {
 		return nil, fmt.Errorf("invaild token, or not base64 encoded: %s", err)
 	}
 
-	kubeCfg.Clusters["default"] = &clusterConfig
-	kubeCfg.AuthInfos["default"] = &clientcmdapi.AuthInfo{
+	kubeCfg.Clusters[cfg.ClusterName] = &clusterConfig
+	kubeCfg.AuthInfos[cfg.AuthInfoName] = &clientcmdapi.AuthInfo{
 		Token: string(token),
 	}
 	ctx := &clientcmdapi.Context{
-		Cluster:  "default",
-		AuthInfo: "default",
+		Cluster:  cfg.ClusterName,
+		AuthInfo: cfg.AuthInfoName,
 	}
 	if cfg.Namespace != "" {
 		ctx.Namespace = cfg.Namespace
 	}
-	kubeCfg.Contexts["default"] = ctx
-	kubeCfg.CurrentContext = "default"
+	kubeCfg.Contexts[cfg.ContextName] = ctx
+	kubeCfg.CurrentContext = cfg.ContextName
 
 	return kubeCfg, nil
 }

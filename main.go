@@ -71,6 +71,29 @@ func main() {
 			Usage:   "template files, support glob pattern",
 			EnvVars: []string{"PLUGIN_TEMPLATES", "INPUT_TEMPLATES"},
 		},
+		&cli.StringFlag{
+			Name:    "output",
+			Usage:   "Generate Kubernetes config file",
+			EnvVars: []string{"PLUGIN_OUTPUT", "INPUT_OUTPUT"},
+		},
+		&cli.StringFlag{
+			Name:    "cluster-name",
+			Usage:   "",
+			EnvVars: []string{"PLUGIN_CLUSTER_NAME", "INPUT_CLUSTER_NAME"},
+			Value:   "default",
+		},
+		&cli.StringFlag{
+			Name:    "authinfo-name",
+			Usage:   "",
+			EnvVars: []string{"PLUGIN_AUTHINFO_NAME", "INPUT_AUTHINFO_NAME"},
+			Value:   "default",
+		},
+		&cli.StringFlag{
+			Name:    "context-name",
+			Usage:   "",
+			EnvVars: []string{"PLUGIN_CONTEXT_NAME", "INPUT_CONTEXT_NAME"},
+			Value:   "default",
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -81,13 +104,17 @@ func main() {
 func run(c *cli.Context) error {
 	plugin := &Plugin{
 		Config: &config.K8S{
-			Server:    c.String("server"),
-			SkipTLS:   c.Bool("skip-tls"),
-			CaCert:    c.String("ca-cert"),
-			Token:     c.String("token"),
-			Namespace: c.String("namespace"),
-			ProxyURL:  c.String("proxy-url"),
-			Templates: c.StringSlice("templates"),
+			Server:       c.String("server"),
+			SkipTLS:      c.Bool("skip-tls"),
+			CaCert:       c.String("ca-cert"),
+			Token:        c.String("token"),
+			Namespace:    c.String("namespace"),
+			ProxyURL:     c.String("proxy-url"),
+			Templates:    c.StringSlice("templates"),
+			Output:       c.String("output"),
+			ClusterName:  c.String("cluster-name"),
+			AuthInfoName: c.String("authinfo-name"),
+			ContextName:  c.String("context-name"),
 		},
 	}
 

@@ -9,12 +9,15 @@ import (
 
 func TestNewKubeClientConfig(t *testing.T) {
 	cfg := &config.K8S{
-		Server:    "https://my-kubernetes-api-server",
-		SkipTLS:   false,
-		CaCert:    base64.StdEncoding.EncodeToString([]byte("base64-encoded-ca-cert")),
-		ProxyURL:  "http://proxy.example.com",
-		Token:     base64.StdEncoding.EncodeToString([]byte("base64-encoded-token")),
-		Namespace: "my-namespace",
+		Server:       "https://my-kubernetes-api-server",
+		SkipTLS:      false,
+		CaCert:       base64.StdEncoding.EncodeToString([]byte("base64-encoded-ca-cert")),
+		ProxyURL:     "http://proxy.example.com",
+		Token:        base64.StdEncoding.EncodeToString([]byte("base64-encoded-token")),
+		Namespace:    "my-namespace",
+		ClusterName:  "my-cluster",
+		AuthInfoName: "my-auth-info",
+		ContextName:  "my-context",
 	}
 
 	kubeCfg, err := NewClientConfig(cfg)
@@ -23,10 +26,9 @@ func TestNewKubeClientConfig(t *testing.T) {
 		return
 	}
 
-	// 驗證 cluster 設定
-	cluster, ok := kubeCfg.Clusters["default"]
+	cluster, ok := kubeCfg.Clusters[cfg.ClusterName]
 	if !ok {
-		t.Errorf("Cluster 'default' not found in the config")
+		t.Errorf("Cluster '" + cfg.ClusterName + "' not found in the config")
 		return
 	}
 	if cluster.Server != cfg.Server {
@@ -35,37 +37,32 @@ func TestNewKubeClientConfig(t *testing.T) {
 	if cluster.InsecureSkipTLSVerify != false {
 		t.Errorf("Expected InsecureSkipTLSVerify: false, got: %v", cluster.InsecureSkipTLSVerify)
 	}
-	// 驗證其他 cluster 設定...
 
-	// 驗證 authInfo 設定
-	authInfo, ok := kubeCfg.AuthInfos["default"]
+	authInfo, ok := kubeCfg.AuthInfos[cfg.AuthInfoName]
 	if !ok {
-		t.Errorf("AuthInfo 'default' not found in the config")
+		t.Errorf("AuthInfo '" + cfg.AuthInfoName + "' not found in the config")
 		return
 	}
 	if authInfo.Token != "base64-encoded-token" {
 		t.Errorf("Expected token: base64-encoded-token, got: %s", authInfo.Token)
 	}
-	// 驗證其他 authInfo 設定...
 
-	// 驗證 context 設定
-	context, ok := kubeCfg.Contexts["default"]
+	context, ok := kubeCfg.Contexts[cfg.ContextName]
 	if !ok {
-		t.Errorf("Context 'default' not found in the config")
+		t.Errorf("Context '" + cfg.ContextName + "' not found in the config")
 		return
 	}
-	if context.Cluster != "default" {
-		t.Errorf("Expected cluster: default, got: %s", context.Cluster)
+	if context.Cluster != cfg.ClusterName {
+		t.Errorf("Expected cluster: %s, got: %s", cfg.ClusterName, context.Cluster)
 	}
-	if context.AuthInfo != "default" {
-		t.Errorf("Expected authInfo: default, got: %s", context.AuthInfo)
+	if context.AuthInfo != cfg.AuthInfoName {
+		t.Errorf("Expected authInfo: %s, got: %s", cfg.AuthInfoName, context.AuthInfo)
 	}
 	if context.Namespace != cfg.Namespace {
 		t.Errorf("Expected namespace: %s, got: %s", cfg.Namespace, context.Namespace)
 	}
-	// 驗證其他 context 設定...
 
-	if kubeCfg.CurrentContext != "default" {
-		t.Errorf("Expected currentContext: default, got: %s", kubeCfg.CurrentContext)
+	if kubeCfg.CurrentContext != cfg.ContextName {
+		t.Errorf("Expected currentContext: %s, got: %s", cfg.ContextName, kubeCfg.CurrentContext)
 	}
 }

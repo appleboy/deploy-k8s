@@ -10,5 +10,11 @@ type (
 		Namespace string
 		ProxyURL  string
 		Templates []string
+		Output    string
+
+		// kube config file
+		ClusterName  string
+		AuthInfoName string
+		ContextName  string
 	}
 )

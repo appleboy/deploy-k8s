@@ -16,6 +16,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/restmapper"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 type (
@@ -34,6 +35,20 @@ func (p *Plugin) Exec() error {
 	}
 	if p.Config.CaCert == "" {
 		return fmt.Errorf("ca_cert is required")
+	}
+
+	// Generate kube config
+	if p.Config.Output != "" {
+		kubeCfg, err := kube.NewClientConfig(p.Config)
+		if err != nil {
+			return err
+		}
+		err = clientcmd.WriteToFile(*kubeCfg, p.Config.Output)
+		if err != nil {
+			return err
+		}
+		log.Println("Generated kube config file:", p.Config.Output)
+		return nil
 	}
 
 	restConfig, err := kube.NewRestConfig(p.Config)

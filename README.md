@@ -22,7 +22,7 @@ deploy-k8s --help
 
 | Parameter           | Description                                                   | Environment Variables                       |
 |---------------------|---------------------------------------------------------------|---------------------------------------------|
-| --server            | Address of the Kubernetes cluster (https://hostname:port)      | $PLUGIN_SERVER, $INPUT_SERVER               |
+| --server            | Address of the Kubernetes cluster `https://hostname:port`      | $PLUGIN_SERVER, $INPUT_SERVER               |
 | --skip-tls          | Skip validity check for server's certificate (default: false)   | $PLUGIN_SKIP_TLS_VERIFY, $INPUT_SKIP_TLS_VERIFY |
 | --ca-cert           | PEM-encoded certificate authority certificates                 | $PLUGIN_CA_CERT, $INPUT_CA_CERT             |
 | --token             | Kubernetes service account token                               | $PLUGIN_TOKEN, $INPUT_TOKEN                 |

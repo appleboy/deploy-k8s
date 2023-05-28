@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/appleboy/deploy-k8s/config"
+
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/urfave/cli/v2"
@@ -25,7 +26,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = "Deploy Kubernetes plugin"
-	app.Usage = "Deploy Kubernetes plugin"
+	app.Usage = "Generate a Kubeconfig or creating & updating K8s Deployments."
 	app.Copyright = "Copyright (c) " + strconv.Itoa(time.Now().Year()) + " Bo-Yi Wu"
 	app.Authors = []*cli.Author{
 		{

@@ -107,7 +107,6 @@ func run(c *cli.Context) error {
 			Server:       c.String("server"),
 			SkipTLS:      c.Bool("skip-tls"),
 			CaCert:       c.String("ca-cert"),
-			Token:        c.String("token"),
 			Namespace:    c.String("namespace"),
 			ProxyURL:     c.String("proxy-url"),
 			Templates:    c.StringSlice("templates"),
@@ -115,6 +114,9 @@ func run(c *cli.Context) error {
 			ClusterName:  c.String("cluster-name"),
 			AuthInfoName: c.String("authinfo-name"),
 			ContextName:  c.String("context-name"),
+		},
+		AuthInfo: &config.AuthInfo{
+			Token: c.String("token"),
 		},
 	}
 

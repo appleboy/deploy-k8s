@@ -13,14 +13,17 @@ func TestNewKubeClientConfig(t *testing.T) {
 		SkipTLS:      false,
 		CaCert:       base64.StdEncoding.EncodeToString([]byte("base64-encoded-ca-cert")),
 		ProxyURL:     "http://proxy.example.com",
-		Token:        base64.StdEncoding.EncodeToString([]byte("base64-encoded-token")),
 		Namespace:    "my-namespace",
 		ClusterName:  "my-cluster",
 		AuthInfoName: "my-auth-info",
 		ContextName:  "my-context",
 	}
 
-	kubeCfg, err := NewClientConfig(cfg)
+	auth := &config.AuthInfo{
+		Token: base64.StdEncoding.EncodeToString([]byte("base64-encoded-token")),
+	}
+
+	kubeCfg, err := NewClientConfig(cfg, auth)
 	if err != nil {
 		t.Errorf("Error creating Kubernetes client config: %s", err)
 		return

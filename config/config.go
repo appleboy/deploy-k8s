@@ -6,7 +6,6 @@ type (
 		Server    string
 		SkipTLS   bool
 		CaCert    string
-		Token     string
 		Namespace string
 		ProxyURL  string
 		Templates []string
@@ -16,5 +15,9 @@ type (
 		ClusterName  string
 		AuthInfoName string
 		ContextName  string
+	}
+
+	AuthInfo struct {
+		Token string
 	}
 )

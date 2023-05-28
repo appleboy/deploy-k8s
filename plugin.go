@@ -22,7 +22,8 @@ import (
 type (
 	// Plugin values.
 	Plugin struct {
-		Config *config.K8S
+		Config   *config.K8S
+		AuthInfo *config.AuthInfo
 	}
 )
 
@@ -30,7 +31,7 @@ func (p *Plugin) Exec() error {
 	if p.Config.Server == "" {
 		return fmt.Errorf("server is required")
 	}
-	if p.Config.Token == "" {
+	if p.AuthInfo.Token == "" {
 		return fmt.Errorf("token is required")
 	}
 	if p.Config.CaCert == "" {
@@ -39,7 +40,7 @@ func (p *Plugin) Exec() error {
 
 	// Generate kube config
 	if p.Config.Output != "" {
-		kubeCfg, err := kube.NewClientConfig(p.Config)
+		kubeCfg, err := kube.NewClientConfig(p.Config, p.AuthInfo)
 		if err != nil {
 			return err
 		}
@@ -51,7 +52,7 @@ func (p *Plugin) Exec() error {
 		return nil
 	}
 
-	restConfig, err := kube.NewRestConfig(p.Config)
+	restConfig, err := kube.NewRestConfig(p.Config, p.AuthInfo)
 	if err != nil {
 		return err
 	}

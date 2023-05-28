@@ -11,7 +11,7 @@ import (
 )
 
 // NewKubeClientConfig returns a new Kubernetes client config.
-func NewClientConfig(cfg *config.K8S) (*clientcmdapi.Config, error) {
+func NewClientConfig(cfg *config.K8S, auth *config.AuthInfo) (*clientcmdapi.Config, error) {
 	kubeCfg := clientcmdapi.NewConfig()
 	clusterConfig := clientcmdapi.Cluster{
 		Server: cfg.Server,
@@ -32,7 +32,7 @@ func NewClientConfig(cfg *config.K8S) (*clientcmdapi.Config, error) {
 		clusterConfig.ProxyURL = cfg.ProxyURL
 	}
 
-	token, err := base64.StdEncoding.DecodeString(cfg.Token)
+	token, err := base64.StdEncoding.DecodeString(auth.Token)
 	if err != nil {
 		return nil, fmt.Errorf("invaild token, or not base64 encoded: %s", err)
 	}
@@ -55,8 +55,8 @@ func NewClientConfig(cfg *config.K8S) (*clientcmdapi.Config, error) {
 }
 
 // NewRestConfig returns a new rest config.
-func NewRestConfig(cfg *config.K8S) (*rest.Config, error) {
-	kubeCfg, err := NewClientConfig(cfg)
+func NewRestConfig(cfg *config.K8S, auth *config.AuthInfo) (*rest.Config, error) {
+	kubeCfg, err := NewClientConfig(cfg, auth)
 	if err != nil {
 		return nil, fmt.Errorf("new kube client config; %w", err)
 	}

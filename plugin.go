@@ -104,7 +104,9 @@ func (p *Plugin) Exec() error {
 			context.Background(),
 			v.Obj.GetName(),
 			v.Obj,
-			metav1.ApplyOptions{},
+			metav1.ApplyOptions{
+				FieldManager: "deploy-k8s-plugin",
+			},
 		)
 		if err != nil {
 			return err

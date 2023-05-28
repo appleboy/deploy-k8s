@@ -1,0 +1,7 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .envs.app_name }}
+  namespace: {{ .envs.app_namespace }}
+  labels:
+    app: {{ .envs.app_name }}

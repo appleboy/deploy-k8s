@@ -73,6 +73,9 @@ func (p *Plugin) Exec() error {
 	}
 
 	kubeObjs, err := template.ParseSet(p.Config.Templates, template.GetAllEnviroment())
+	if err != nil {
+		return err
+	}
 
 	for _, v := range kubeObjs {
 		mapping, err := mapper.RESTMapping(v.GVK.GroupKind(), v.GVK.Version)

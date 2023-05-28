@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/appleboy/deploy-k8s/config"
+
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
@@ -17,7 +18,7 @@ func NewClientConfig(cfg *config.K8S, auth *config.AuthInfo) (*clientcmdapi.Conf
 		Server: cfg.Server,
 	}
 
-	if cfg.SkipTLS == true {
+	if cfg.SkipTLS {
 		clusterConfig.InsecureSkipTLSVerify = true
 	} else {
 		ca, err := base64.StdEncoding.DecodeString(cfg.CaCert)

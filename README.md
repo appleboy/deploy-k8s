@@ -81,3 +81,10 @@ Get the token from the secret with `default` namespace.
 kubectl get secret drone-ci -n default \
   -o jsonpath='{.data.token}'
 ```
+
+## How To Get Kubernetes Namespace
+
+```sh
+kubectl config view --raw --minify --flatten \
+  -o jsonpath='{.contexts[].context.namespace}'
+```

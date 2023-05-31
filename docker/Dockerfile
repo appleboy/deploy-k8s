@@ -17,4 +17,6 @@ RUN apk add --no-cache ca-certificates=20230506-r0 && \
 
 COPY release/${TARGETOS}/${TARGETARCH}/deploy-k8s /bin/
 
+WORKDIR /app
+
 ENTRYPOINT ["/bin/deploy-k8s"]

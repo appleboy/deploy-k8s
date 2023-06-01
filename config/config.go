@@ -12,6 +12,10 @@ type (
 		Output    string
 		Debug     bool
 
+		Deployment string
+		Container  string
+		Image      string
+
 		// kube config file
 		ClusterName  string
 		AuthInfoName string

@@ -11,12 +11,15 @@ import (
 	"github.com/rs/zerolog/log"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	memory "k8s.io/client-go/discovery/cached"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/retry"
 )
 
 type (
@@ -61,16 +64,16 @@ func (p *Plugin) Exec() error {
 		return err
 	}
 
+	dyn, err := dynamic.NewForConfig(restConfig)
+	if err != nil {
+		return err
+	}
+
 	dc, err := discovery.NewDiscoveryClientForConfig(restConfig)
 	if err != nil {
 		return err
 	}
 	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
-
-	dyn, err := dynamic.NewForConfig(restConfig)
-	if err != nil {
-		return err
-	}
 
 	kubeObjs, err := template.ParseSet(p.Config.Templates, template.GetAllEnviroment())
 	if err != nil {
@@ -110,6 +113,7 @@ func (p *Plugin) Exec() error {
 			v.Obj,
 			metav1.ApplyOptions{
 				FieldManager: "deploy-k8s-plugin",
+				Force:        true,
 			},
 		)
 		if err != nil {
@@ -133,6 +137,85 @@ func (p *Plugin) Exec() error {
 		l.Info().
 			Msg("apply resource success")
 	}
+
+	// update deployment container image
+	deploymentRes := schema.GroupVersionResource{
+		Group:    "apps",
+		Version:  "v1",
+		Resource: "deployments",
+	}
+
+	l := log.With().
+		Str("namespace", p.Config.Namespace).
+		Logger()
+
+	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		result, err := dyn.Resource(deploymentRes).
+			Namespace(p.Config.Namespace).
+			Get(context.Background(), p.Config.Deployment, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+		containers, found, err := unstructured.NestedSlice(result.Object, "spec", "template", "spec", "containers")
+		if err != nil || !found || containers == nil {
+			return fmt.Errorf("deployment containers not found or error in spec: %v", err)
+		}
+		for index, container := range containers {
+			maps := container.(map[string]interface{})
+			l.Info().Msgf("container name: %s, image name: %s", maps["name"], maps["image"])
+			if maps["name"] == p.Config.Container {
+				if err := unstructured.SetNestedField(
+					containers[index].(map[string]interface{}),
+					p.Config.Image,
+					"image",
+				); err != nil {
+					return err
+				}
+			}
+		}
+
+		if err := unstructured.SetNestedField(
+			result.Object, containers,
+			"spec", "template", "spec", "containers",
+		); err != nil {
+			return err
+		}
+
+		_, err = dyn.Resource(deploymentRes).
+			Namespace(p.Config.Namespace).
+			Update(context.TODO(), result, metav1.UpdateOptions{
+				FieldManager: "deploy-k8s-plugin",
+			})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if retryErr != nil {
+		return err
+	}
+
+	// list, err := dyn.Resource(deploymentRes).
+	// 	Namespace(p.Config.Namespace).
+	// 	List(context.TODO(), metav1.ListOptions{})
+	// if err != nil {
+	// 	return err
+	// }
+
+	// for _, d := range list.Items {
+	// 	replicas, found, err := unstructured.NestedInt64(d.Object, "spec", "replicas")
+	// 	if err != nil || !found {
+	// 		log.Warn().Err(err).Msgf(
+	// 			"Replicas not found for deployment %s",
+	// 			d.GetName())
+	// 		continue
+	// 	}
+	// 	l.Info().
+	// 		Int64("replicas", replicas).
+	// 		Str("name", d.GetName()).
+	// 		Msg("show replica number")
+	// }
 
 	return nil
 }

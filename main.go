@@ -85,6 +85,21 @@ func main() {
 			EnvVars: []string{"PLUGIN_NAMESPACE", "INPUT_NAMESPACE"},
 		},
 		&cli.StringFlag{
+			Name:    "deployment",
+			Usage:   "kubernetes deployment name",
+			EnvVars: []string{"PLUGIN_DEPLOYMENT", "INPUT_DEPLOYMENT"},
+		},
+		&cli.StringFlag{
+			Name:    "container",
+			Usage:   "kubernetes deployment container name",
+			EnvVars: []string{"PLUGIN_CONTAINER", "INPUT_CONTAINER"},
+		},
+		&cli.StringFlag{
+			Name:    "image",
+			Usage:   "kubernetes deployment container image name",
+			EnvVars: []string{"PLUGIN_IMAGE", "INPUT_IMAGE"},
+		},
+		&cli.StringFlag{
 			Name:    "proxy-url",
 			Usage:   "URLs with http, https, and socks5",
 			EnvVars: []string{"PLUGIN_PROXY_URL", "INPUT_PROXY_URL"},
@@ -141,6 +156,9 @@ func run(c *cli.Context) error {
 			SkipTLS:      c.Bool("skip-tls"),
 			CaCert:       c.String("ca-cert"),
 			Namespace:    c.String("namespace"),
+			Deployment:   c.String("deployment"),
+			Container:    c.String("container"),
+			Image:        c.String("image"),
 			ProxyURL:     c.String("proxy-url"),
 			Templates:    c.StringSlice("templates"),
 			Output:       c.String("output"),

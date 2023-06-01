@@ -32,16 +32,16 @@ spec:
 
 ---
 apiVersion: v1
-kind: ServiceAccount
+kind: Service
 metadata:
-  name: drone-ci
+  name: {{ .envs.app_name }}
   namespace: {{ .envs.app_namespace }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: drone-ci
-  namespace: {{ .envs.app_namespace }}
-  annotations:
-    kubernetes.io/service-account.name: drone-ci
-type: kubernetes.io/service-account-token
+  labels:
+    app: {{ .envs.app_name }}
+spec:
+  ports:
+    - nodePort: 30000
+      port: 80
+  selector:
+    app: {{ .envs.app_name }}
+  type: NodePort

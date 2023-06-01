@@ -33,14 +33,9 @@ func NewClientConfig(cfg *config.K8S, auth *config.AuthInfo) (*clientcmdapi.Conf
 		clusterConfig.ProxyURL = cfg.ProxyURL
 	}
 
-	token, err := base64.StdEncoding.DecodeString(auth.Token)
-	if err != nil {
-		return nil, fmt.Errorf("invaild token, or not base64 encoded: %s", err)
-	}
-
 	kubeCfg.Clusters[cfg.ClusterName] = &clusterConfig
 	kubeCfg.AuthInfos[cfg.AuthInfoName] = &clientcmdapi.AuthInfo{
-		Token: string(token),
+		Token: auth.Token,
 	}
 	ctx := &clientcmdapi.Context{
 		Cluster:  cfg.ClusterName,

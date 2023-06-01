@@ -20,7 +20,7 @@ func TestNewKubeClientConfig(t *testing.T) {
 	}
 
 	auth := &config.AuthInfo{
-		Token: base64.StdEncoding.EncodeToString([]byte("base64-encoded-token")),
+		Token: "base64-decoded-token",
 	}
 
 	kubeCfg, err := NewClientConfig(cfg, auth)
@@ -46,8 +46,8 @@ func TestNewKubeClientConfig(t *testing.T) {
 		t.Errorf("AuthInfo '" + cfg.AuthInfoName + "' not found in the config")
 		return
 	}
-	if authInfo.Token != "base64-encoded-token" {
-		t.Errorf("Expected token: base64-encoded-token, got: %s", authInfo.Token)
+	if authInfo.Token != "base64-decoded-token" {
+		t.Errorf("Expected token: base64-decoded-token, got: %s", authInfo.Token)
 	}
 
 	context, ok := kubeCfg.Contexts[cfg.ContextName]

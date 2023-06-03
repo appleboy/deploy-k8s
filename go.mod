@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/appleboy/com v0.1.7
+	github.com/davecgh/go-spew v1.1.1
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-isatty v0.0.19
 	github.com/rs/zerolog v1.29.1
@@ -14,7 +15,6 @@ require (
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.10.2 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect

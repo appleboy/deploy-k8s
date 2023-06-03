@@ -7,6 +7,7 @@ import (
 
 	"github.com/appleboy/deploy-k8s/config"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/joho/godotenv"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/mattn/go-isatty"
@@ -170,6 +171,10 @@ func run(c *cli.Context) error {
 		AuthInfo: &config.AuthInfo{
 			Token: c.String("token"),
 		},
+	}
+
+	if plugin.Config.Debug {
+		spew.Dump(plugin)
 	}
 
 	return plugin.Exec()

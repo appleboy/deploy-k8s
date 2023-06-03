@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .envs.app_name }}
+  name: {{ .envs.deploy_nginx_01 }}
   namespace: {{ .envs.app_namespace }}
   labels:
-    app: {{ .envs.app_name }}
+    app: {{ .envs.deploy_nginx_01 }}
 spec:
   selector:
     matchLabels:
-      app: {{ .envs.app_name }}
+      app: {{ .envs.deploy_nginx_01 }}
   template:
     metadata:
-      name: {{ .envs.app_name }}
+      name: {{ .envs.deploy_nginx_01 }}
       labels:
-        app: {{ .envs.app_name }}
+        app: {{ .envs.deploy_nginx_01 }}
     spec:
       containers:
-        - name: {{ .envs.app_name }}
-          image: nginx:latest
+        - name: {{ .envs.deploy_nginx_01 }}
+          image: nginx:1.25.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -34,14 +34,63 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .envs.app_name }}
+  name: {{ .envs.deploy_nginx_01 }}
   namespace: {{ .envs.app_namespace }}
   labels:
-    app: {{ .envs.app_name }}
+    app: {{ .envs.deploy_nginx_01 }}
 spec:
   ports:
     - nodePort: 30000
       port: 80
   selector:
-    app: {{ .envs.app_name }}
+    app: {{ .envs.deploy_nginx_01 }}
+  type: NodePort
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .envs.deploy_nginx_02 }}
+  namespace: {{ .envs.app_namespace }}
+  labels:
+    app: {{ .envs.deploy_nginx_02 }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .envs.deploy_nginx_02 }}
+  template:
+    metadata:
+      name: {{ .envs.deploy_nginx_02 }}
+      labels:
+        app: {{ .envs.deploy_nginx_02 }}
+    spec:
+      containers:
+        - name: {{ .envs.deploy_nginx_02 }}
+          image: nginx:1.24.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .envs.deploy_nginx_02 }}
+  namespace: {{ .envs.app_namespace }}
+  labels:
+    app: {{ .envs.deploy_nginx_02 }}
+spec:
+  ports:
+    - nodePort: 30001
+      port: 80
+  selector:
+    app: {{ .envs.deploy_nginx_02 }}
   type: NodePort

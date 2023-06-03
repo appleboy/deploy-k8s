@@ -84,12 +84,12 @@ func main() {
 			Usage:   "kubernetes namespace",
 			EnvVars: []string{"PLUGIN_NAMESPACE", "INPUT_NAMESPACE"},
 		},
-		&cli.StringFlag{
+		&cli.StringSliceFlag{
 			Name:    "deployment",
 			Usage:   "kubernetes deployment name",
 			EnvVars: []string{"PLUGIN_DEPLOYMENT", "INPUT_DEPLOYMENT"},
 		},
-		&cli.StringFlag{
+		&cli.StringSliceFlag{
 			Name:    "container",
 			Usage:   "kubernetes deployment container name",
 			EnvVars: []string{"PLUGIN_CONTAINER", "INPUT_CONTAINER"},
@@ -156,8 +156,8 @@ func run(c *cli.Context) error {
 			SkipTLS:      c.Bool("skip-tls"),
 			CaCert:       c.String("ca-cert"),
 			Namespace:    c.String("namespace"),
-			Deployment:   c.String("deployment"),
-			Container:    c.String("container"),
+			Deployment:   c.StringSlice("deployment"),
+			Container:    c.StringSlice("container"),
 			Image:        c.String("image"),
 			ProxyURL:     c.String("proxy-url"),
 			Templates:    c.StringSlice("templates"),

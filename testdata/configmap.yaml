@@ -1,7 +1,16 @@
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ .envs.app_name }}
+  name: {{ .envs.deploy_nginx_01 }}
   namespace: {{ .envs.app_namespace }}
   labels:
-    app: {{ .envs.app_name }}
+    app: {{ .envs.deploy_nginx_01 }}
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .envs.deploy_nginx_02 }}
+  namespace: {{ .envs.app_namespace }}
+  labels:
+    app: {{ .envs.deploy_nginx_02 }}

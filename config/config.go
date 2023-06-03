@@ -12,8 +12,8 @@ type (
 		Output    string
 		Debug     bool
 
-		Deployment string
-		Container  string
+		Deployment []string
+		Container  []string
 		Image      string
 
 		// kube config file

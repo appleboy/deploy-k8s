@@ -79,7 +79,7 @@ Get the token from the secret with `default` namespace.
 
 ```sh
 kubectl get secret drone-ci -n default \
-  -o jsonpath='{.data.token}'
+  -o jsonpath='{.data.token}' | base64 -d
 ```
 
 ## How To Get Kubernetes Namespace

@@ -3,6 +3,7 @@ module github.com/appleboy/deploy-k8s
 go 1.20
 
 require (
+	github.com/appleboy/com v0.1.7
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-isatty v0.0.19
 	github.com/rs/zerolog v1.29.1

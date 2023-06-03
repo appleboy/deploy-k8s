@@ -8,6 +8,7 @@ import (
 	"github.com/appleboy/deploy-k8s/kube"
 	"github.com/appleboy/deploy-k8s/template"
 
+	"github.com/appleboy/com/array"
 	"github.com/rs/zerolog/log"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -150,8 +151,8 @@ func (p *Plugin) Apply(cfg *rest.Config) error {
 
 // Update kubernetes deployment container image
 func (p *Plugin) UpdateContainer(cfg *rest.Config) error {
-	if p.Config.Deployment == "" ||
-		p.Config.Container == "" ||
+	if len(p.Config.Deployment) == 0 ||
+		len(p.Config.Container) == 0 ||
 		p.Config.Image == "" {
 		return nil
 	}
@@ -172,20 +173,29 @@ func (p *Plugin) UpdateContainer(cfg *rest.Config) error {
 		Str("namespace", p.Config.Namespace).
 		Logger()
 
-	tryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		result, err := dyn.Resource(deploymentRes).
-			Namespace(p.Config.Namespace).
-			Get(context.Background(), p.Config.Deployment, metav1.GetOptions{})
-		if err != nil {
-			return err
-		}
-		containers, found, err := unstructured.NestedSlice(result.Object, "spec", "template", "spec", "containers")
-		if err != nil || !found || containers == nil {
-			return fmt.Errorf("deployment containers not found or error in spec: %v", err)
-		}
-		for index, container := range containers {
-			maps := container.(map[string]interface{})
-			if maps["name"] == p.Config.Container {
+	for _, deployment := range p.Config.Deployment {
+		tryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+			result, err := dyn.Resource(deploymentRes).
+				Namespace(p.Config.Namespace).
+				Get(context.Background(), deployment, metav1.GetOptions{})
+			if err != nil {
+				return err
+			}
+			containers, found, err := unstructured.NestedSlice(result.Object, "spec", "template", "spec", "containers")
+			if err != nil || !found || containers == nil {
+				return fmt.Errorf("deployment containers not found or error in spec: %v", err)
+			}
+			for index, container := range containers {
+				maps := container.(map[string]interface{})
+				if !array.InSlice(maps["name"].(string), p.Config.Container) {
+					l.Warn().
+						Str("deployment", deployment).
+						Str("container", maps["name"].(string)).
+						Str("image", p.Config.Image).
+						Msg("container not found in deployment")
+					continue
+				}
+
 				if err := unstructured.SetNestedField(
 					containers[index].(map[string]interface{}),
 					p.Config.Image,
@@ -193,32 +203,35 @@ func (p *Plugin) UpdateContainer(cfg *rest.Config) error {
 				); err != nil {
 					return err
 				}
+
+				l.Info().
+					Str("deployment", deployment).
+					Str("container", maps["name"].(string)).
+					Str("image", p.Config.Image).
+					Msg("update deployment container image success")
 			}
+
+			if err := unstructured.SetNestedField(
+				result.Object, containers,
+				"spec", "template", "spec", "containers",
+			); err != nil {
+				return err
+			}
+
+			_, err = dyn.Resource(deploymentRes).
+				Namespace(p.Config.Namespace).
+				Update(context.TODO(), result, metav1.UpdateOptions{
+					FieldManager: "deploy-k8s-plugin",
+				})
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+		if tryErr != nil {
+			return tryErr
 		}
+	}
 
-		if err := unstructured.SetNestedField(
-			result.Object, containers,
-			"spec", "template", "spec", "containers",
-		); err != nil {
-			return err
-		}
-
-		_, err = dyn.Resource(deploymentRes).
-			Namespace(p.Config.Namespace).
-			Update(context.TODO(), result, metav1.UpdateOptions{
-				FieldManager: "deploy-k8s-plugin",
-			})
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-
-	l.Info().
-		Str("deployment", p.Config.Deployment).
-		Str("container", p.Config.Container).
-		Str("image", p.Config.Image).
-		Msg("update deployment container image success")
-
-	return tryErr
+	return nil
 }

@@ -38,9 +38,6 @@ func (p *Plugin) Exec() error {
 	if p.AuthInfo.Token == "" {
 		return fmt.Errorf("token is required")
 	}
-	if p.Config.CaCert == "" {
-		return fmt.Errorf("ca_cert is required")
-	}
 
 	// Generate kube config
 	if p.Config.Output != "" {

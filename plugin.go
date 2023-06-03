@@ -7,6 +7,7 @@ import (
 	"github.com/appleboy/deploy-k8s/config"
 	"github.com/appleboy/deploy-k8s/kube"
 	"github.com/appleboy/deploy-k8s/template"
+	"github.com/davecgh/go-spew/spew"
 
 	"github.com/appleboy/com/array"
 	"github.com/rs/zerolog/log"
@@ -81,7 +82,11 @@ func (p *Plugin) Apply(cfg *rest.Config) error {
 	}
 	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
 
-	kubeObjs, err := template.ParseSet(p.Config.Templates, template.GetAllEnviroment())
+	allenvs := template.GetAllEnviroment()
+	if p.Config.Debug {
+		spew.Dump(allenvs)
+	}
+	kubeObjs, err := template.ParseSet(p.Config.Templates, allenvs)
 	if err != nil {
 		return err
 	}

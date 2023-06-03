@@ -87,17 +87,17 @@ func main() {
 		},
 		&cli.StringSliceFlag{
 			Name:    "deployment",
-			Usage:   "kubernetes deployment name",
+			Usage:   "Name of the Kubernetes deployment to update",
 			EnvVars: []string{"PLUGIN_DEPLOYMENT", "INPUT_DEPLOYMENT"},
 		},
 		&cli.StringSliceFlag{
 			Name:    "container",
-			Usage:   "kubernetes deployment container name",
+			Usage:   "Name of the container within the deployment to update",
 			EnvVars: []string{"PLUGIN_CONTAINER", "INPUT_CONTAINER"},
 		},
 		&cli.StringFlag{
 			Name:    "image",
-			Usage:   "kubernetes deployment container image name",
+			Usage:   "New image and tag for the container",
 			EnvVars: []string{"PLUGIN_IMAGE", "INPUT_IMAGE"},
 		},
 		&cli.StringFlag{

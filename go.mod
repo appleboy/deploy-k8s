@@ -8,7 +8,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-isatty v0.0.19
 	github.com/rs/zerolog v1.29.1
-	github.com/urfave/cli/v2 v2.25.4
+	github.com/urfave/cli/v2 v2.25.6
 	k8s.io/apimachinery v0.27.2
 	k8s.io/client-go v0.27.2
 )

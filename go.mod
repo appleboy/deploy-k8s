@@ -9,7 +9,7 @@ require (
 	github.com/mattn/go-isatty v0.0.19
 	github.com/rs/zerolog v1.29.1
 	github.com/urfave/cli/v2 v2.25.7
-	k8s.io/apimachinery v0.27.3
+	k8s.io/apimachinery v0.27.4
 	k8s.io/client-go v0.27.3
 )
 

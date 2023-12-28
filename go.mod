@@ -2,8 +2,6 @@ module github.com/appleboy/deploy-k8s
 
 go 1.21
 
-toolchain go1.21.0
-
 require (
 	github.com/appleboy/com v0.1.7
 	github.com/davecgh/go-spew v1.1.1

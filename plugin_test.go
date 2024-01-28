@@ -92,7 +92,7 @@ func TestDeployment(t *testing.T) {
 				AuthInfoName: "test-authinfo",
 				ClusterName:  "test-cluster",
 				Deployment:   []string{"nginx"},
-				Container:    []string{"nginx"},
+				Container:    []string{"nginx", "test"}, // test container not found
 				Image:        "nginx:1.24.0",
 			},
 			AuthInfo: &config.AuthInfo{

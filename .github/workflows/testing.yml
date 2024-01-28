@@ -42,7 +42,7 @@ jobs:
         id: k8s_info
         run: |
           kubectl create namespace test-namespace
-          kubectl apply -f example/serviceAccount.yaml
+          kubectl apply -f testdata/serviceAccount.yaml
           echo K8S_SERVER=$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.server}') >> $GITHUB_OUTPUT
           echo K8S_CA_CERT=$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}') >> $GITHUB_OUTPUT
           echo K8S_TOKEN=$(kubectl get secret deploy -n test-namespace -o jsonpath='{.data.token}' | base64 -d) >> $GITHUB_OUTPUT
@@ -53,10 +53,11 @@ jobs:
           go-version: "^1.21"
 
       - name: testing
+        env:
+          K8S_SERVER: ${{ steps.k8s_info.outputs.K8S_SERVER }}
+          K8S_CA_CERT: ${{ steps.k8s_info.outputs.K8S_CA_CERT }}
+          K8S_TOKEN: ${{ steps.k8s_info.outputs.K8S_TOKEN }}
         run: |
-          export K8S_SERVER=${{ steps.k8s_info.outputs.K8S_SERVER }}
-          export K8S_CA_CERT=${{ steps.k8s_info.outputs.K8S_CA_CERT }}
-          export K8S_TOKEN=${{ steps.k8s_info.outputs.K8S_TOKEN }}
           make test
 
       - name: Upload coverage to Codecov

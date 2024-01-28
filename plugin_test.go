@@ -54,3 +54,24 @@ func TestKubeConfig(t *testing.T) {
 		t.Errorf("Expected error: cannot create kube config: %s", err.Error())
 	}
 }
+
+func TestDeployContainer(t *testing.T) {
+	// Create a new instance of the Plugin struct
+	p := &Plugin{
+		Config: &config.K8S{
+			Server:    os.Getenv("K8S_SERVER"),
+			CaCert:    os.Getenv("K8S_CA_CERT"),
+			Debug:     true,
+			Namespace: "test-namespace",
+			Templates: []string{"testdata/deployment01.yaml"},
+		},
+		AuthInfo: &config.AuthInfo{
+			Token: os.Getenv("K8S_TOKEN"),
+		},
+	}
+
+	err := p.Exec()
+	if err != nil {
+		t.Errorf("Expected error: cannot deploy by template: %s", err.Error())
+	}
+}

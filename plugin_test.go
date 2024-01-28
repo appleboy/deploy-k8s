@@ -55,26 +55,57 @@ func TestKubeConfig(t *testing.T) {
 	}
 }
 
-func TestDeployContainer(t *testing.T) {
-	// Create a new instance of the Plugin struct
-	p := &Plugin{
-		Config: &config.K8S{
-			Server:       os.Getenv("K8S_SERVER"),
-			CaCert:       os.Getenv("K8S_CA_CERT"),
-			Debug:        true,
-			Namespace:    "test-namespace",
-			ContextName:  "test-context",
-			AuthInfoName: "test-authinfo",
-			ClusterName:  "test-cluster",
-			Templates:    []string{"testdata/deployment01.yaml"},
-		},
-		AuthInfo: &config.AuthInfo{
-			Token: os.Getenv("K8S_TOKEN"),
-		},
-	}
+func TestDeployment(t *testing.T) {
+	t.Run("UpdateByTemplate", func(t *testing.T) {
+		// Create a new instance of the Plugin struct
+		p := &Plugin{
+			Config: &config.K8S{
+				Server:       os.Getenv("K8S_SERVER"),
+				CaCert:       os.Getenv("K8S_CA_CERT"),
+				Debug:        true,
+				Namespace:    "test-namespace",
+				ContextName:  "test-context",
+				AuthInfoName: "test-authinfo",
+				ClusterName:  "test-cluster",
+				Templates:    []string{"testdata/deployment01.yaml"},
+			},
+			AuthInfo: &config.AuthInfo{
+				Token: os.Getenv("K8S_TOKEN"),
+			},
+		}
 
-	err := p.Exec()
-	if err != nil {
-		t.Errorf("Expected error: cannot deploy by template: %s", err.Error())
-	}
+		err := p.Exec()
+		if err != nil {
+			t.Errorf("Expected error: cannot deploy by template: %s", err.Error())
+		}
+	})
+
+	t.Run("UpdateContainerVersion", func(t *testing.T) {
+		// Create a new instance of the Plugin struct
+		p := &Plugin{
+			Config: &config.K8S{
+				Server:       os.Getenv("K8S_SERVER"),
+				CaCert:       os.Getenv("K8S_CA_CERT"),
+				Debug:        true,
+				Namespace:    "test-namespace",
+				ContextName:  "test-context",
+				AuthInfoName: "test-authinfo",
+				ClusterName:  "test-cluster",
+				Deployment:   []string{"nginx"},
+				Container:    []string{"nginx"},
+				Image:        "nginx:1.24.0",
+			},
+			AuthInfo: &config.AuthInfo{
+				Token: os.Getenv("K8S_TOKEN"),
+			},
+		}
+
+		err := p.Exec()
+		if err != nil {
+			t.Errorf("Expected error: cannot deploy by template: %s", err.Error())
+		}
+	})
+}
+
+func TestUpdateContainerVersion(t *testing.T) {
 }

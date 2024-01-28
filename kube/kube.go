@@ -56,7 +56,7 @@ func NewRestConfig(cfg *config.K8S, auth *config.AuthInfo) (*rest.Config, error)
 	if err != nil {
 		return nil, fmt.Errorf("new kube client config; %w", err)
 	}
-	clientBuilder := clientcmd.NewNonInteractiveClientConfig(*kubeCfg, "default", &clientcmd.ConfigOverrides{}, nil)
+	clientBuilder := clientcmd.NewNonInteractiveClientConfig(*kubeCfg, cfg.ContextName, &clientcmd.ConfigOverrides{}, nil)
 	actualCfg, err := clientBuilder.ClientConfig()
 	if err != nil {
 		return nil, fmt.Errorf("client builder client config; %w", err)

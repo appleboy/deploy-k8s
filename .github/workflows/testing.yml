@@ -27,7 +27,6 @@ jobs:
 
   testing:
     runs-on: ubuntu-latest
-    container: golang:1.21-alpine
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -39,9 +38,10 @@ jobs:
         run: |
           kubectl version -o yaml --client
 
-      - name: install package
-        run: |
-          apk add make
+      - name: Setup go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "^1.21"
 
       - name: testing
         run: |

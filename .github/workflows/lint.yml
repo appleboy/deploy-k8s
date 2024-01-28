@@ -27,12 +27,15 @@ jobs:
 
   testing:
     runs-on: ubuntu-latest
-    container: golang:1.20-alpine
+    container: golang:1.21-alpine
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: setup sshd server
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.8.0
+
+      - name: install package
         run: |
           apk add make
 

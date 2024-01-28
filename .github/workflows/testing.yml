@@ -54,9 +54,9 @@ jobs:
 
       - name: testing
         run: |
-          K8S_SERVER=${{ steps.k8s_info.outputs.K8S_SERVER }}
-          K8S_CA_CERT=${{ steps.k8s_info.outputs.K8S_CA_CERT }}
-          K8S_TOKEN=${{ steps.k8s_info.outputs.K8S_TOKEN }}
+          export K8S_SERVER=${{ steps.k8s_info.outputs.K8S_SERVER }}
+          export K8S_CA_CERT=${{ steps.k8s_info.outputs.K8S_CA_CERT }}
+          export K8S_TOKEN=${{ steps.k8s_info.outputs.K8S_TOKEN }}
           make test
 
       - name: Upload coverage to Codecov

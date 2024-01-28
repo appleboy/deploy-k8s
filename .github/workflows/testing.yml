@@ -35,6 +35,10 @@ jobs:
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.8.0
 
+      - name: check kubectl version
+        run: |
+          kubectl version -o yaml --client
+
       - name: install package
         run: |
           apk add make

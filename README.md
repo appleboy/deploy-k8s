@@ -1,6 +1,6 @@
 # Deploy K8S Tool
 
-[![Lint and Testing](https://github.com/appleboy/deploy-k8s/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/appleboy/deploy-k8s/actions/workflows/lint.yml)
+[![Lint and Testing](https://github.com/appleboy/deploy-k8s/actions/workflows/testing.yml/badge.svg?branch=main)](https://github.com/appleboy/deploy-k8s/actions/workflows/testing.yml)
 
 Generate a Kubeconfig or creating & updating K8s Deployments.
 

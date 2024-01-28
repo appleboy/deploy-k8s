@@ -39,13 +39,13 @@ func TestKubeConfig(t *testing.T) {
 	// Create a new instance of the Plugin struct
 	p := &Plugin{
 		Config: &config.K8S{
-			Server: os.Getenv("KUBE_SERVER"),
-			CaCert: os.Getenv("KUBE_CA_CERT"),
+			Server: os.Getenv("K8S_SERVER"),
+			CaCert: os.Getenv("K8S_CA_CERT"),
 			Output: "kubeconfig.yaml",
 			Debug:  true,
 		},
 		AuthInfo: &config.AuthInfo{
-			Token: os.Getenv("KUBE_TOKEN"),
+			Token: os.Getenv("K8S_TOKEN"),
 		},
 	}
 

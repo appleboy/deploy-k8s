@@ -38,12 +38,25 @@ jobs:
         run: |
           kubectl version -o yaml --client
 
+      - name: get k8s info
+        id: k8s_info
+        run: |
+          kubectl create namespace test-namespace
+          kubectl apply -f example/serviceAccount.yaml
+          echo K8S_SERVER=$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.server}') >> $GITHUB_OUTPUT
+          echo K8S_CA_CERT=$(kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}') >> $GITHUB_OUTPUT
+          echo K8S_TOKEN=$(kubectl get secret deploy -n test-namespace -o jsonpath='{.data.token}' | base64 -d) >> $GITHUB_OUTPUT
+
       - name: Setup go
         uses: actions/setup-go@v5
         with:
           go-version: "^1.21"
 
       - name: testing
+        env:
+          K8S_SERVER: ${{ steps.k8s_info.outputs.K8S_SERVER }}
+          K8S_CA_CERT: ${{ steps.k8s_info.outputs.K8S_CA_CERT }}
+          K8S_TOKEN: ${{ steps.k8s_info.outputs.K8S_TOKEN }}
         run: |
           make test
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 
 	"github.com/appleboy/deploy-k8s/config"
@@ -31,5 +32,25 @@ func TestCheckConfig(t *testing.T) {
 	err = p.Exec()
 	if err == nil || err.Error() != "token is required" {
 		t.Errorf("Expected error: token is required")
+	}
+}
+
+func TestKubeConfig(t *testing.T) {
+	// Create a new instance of the Plugin struct
+	p := &Plugin{
+		Config: &config.K8S{
+			Server: os.Getenv("KUBE_SERVER"),
+			CaCert: os.Getenv("KUBE_CA_CERT"),
+			Output: "kubeconfig.yaml",
+			Debug:  true,
+		},
+		AuthInfo: &config.AuthInfo{
+			Token: os.Getenv("KUBE_TOKEN"),
+		},
+	}
+
+	err := p.Exec()
+	if err != nil {
+		t.Errorf("Expected error: cannot create kube config: %s", err.Error())
 	}
 }

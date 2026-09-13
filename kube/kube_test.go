@@ -31,7 +31,7 @@ func TestNewKubeClientConfig(t *testing.T) {
 
 	cluster, ok := kubeCfg.Clusters[cfg.ClusterName]
 	if !ok {
-		t.Errorf("Cluster '" + cfg.ClusterName + "' not found in the config")
+		t.Errorf("Cluster '%s' not found in the config", cfg.ClusterName)
 		return
 	}
 	if cluster.Server != cfg.Server {
@@ -43,7 +43,7 @@ func TestNewKubeClientConfig(t *testing.T) {
 
 	authInfo, ok := kubeCfg.AuthInfos[cfg.AuthInfoName]
 	if !ok {
-		t.Errorf("AuthInfo '" + cfg.AuthInfoName + "' not found in the config")
+		t.Errorf("AuthInfo '%s' not found in the config", cfg.AuthInfoName)
 		return
 	}
 	if authInfo.Token != "base64-decoded-token" {
@@ -52,7 +52,7 @@ func TestNewKubeClientConfig(t *testing.T) {
 
 	context, ok := kubeCfg.Contexts[cfg.ContextName]
 	if !ok {
-		t.Errorf("Context '" + cfg.ContextName + "' not found in the config")
+		t.Errorf("Context '%s' not found in the config", cfg.ContextName)
 		return
 	}
 	if context.Cluster != cfg.ClusterName {

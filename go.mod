@@ -1,6 +1,6 @@
 module github.com/appleboy/deploy-k8s
 
-go 1.21
+go 1.26.0
 
 require (
 	github.com/appleboy/com v0.1.7

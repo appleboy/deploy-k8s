@@ -1,4 +1,4 @@
-FROM alpine:3.17
+FROM alpine:3.24.1
 
 ARG TARGETOS
 ARG TARGETARCH
@@ -12,10 +12,15 @@ LABEL org.opencontainers.image.source=https://github.com/appleboy/deploy-k8s
 LABEL org.opencontainers.image.description="Generate a Kubeconfig or creating & updating K8s Deployments."
 LABEL org.opencontainers.image.licenses=MIT
 
-RUN apk add --no-cache ca-certificates && \
-  rm -rf /var/cache/apk/*
+RUN apk upgrade --no-cache && \
+  apk add --no-cache ca-certificates && \
+  addgroup -S -g 10001 deploy && \
+  adduser -S -D -u 10001 -G deploy -h /home/deploy deploy && \
+  mkdir -p /app && chown deploy:deploy /app
 
 COPY release/${TARGETOS}/${TARGETARCH}/deploy-k8s /bin/
+
+USER 10001:10001
 
 WORKDIR /app
 

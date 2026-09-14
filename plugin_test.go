@@ -93,7 +93,7 @@ func TestDeployment(t *testing.T) {
 				ClusterName:  "test-cluster",
 				Deployment:   []string{"nginx"},
 				Container:    []string{"nginx", "test"}, // test container not found
-				Image:        "nginx:1.24.0",
+				Image:        "public.ecr.aws/nginx/nginx-unprivileged:1.30.1-alpine",
 			},
 			AuthInfo: &config.AuthInfo{
 				Token: os.Getenv("K8S_TOKEN"),

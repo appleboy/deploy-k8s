@@ -40,6 +40,19 @@ deploy-k8s --help
 | --help, -h          | Show help                                                     |                                             |
 | --version, -v       | Print the version                                             |                                             |
 
+## Container permissions
+
+The Docker image runs as UID/GID `10001:10001`. Its `/app` working directory
+and `/home/deploy` home directory are writable by this user. When mounting a
+directory for `--output`, grant UID 10001 write access to that directory.
+
+The integration-test service account can only read, patch, and update the
+`nginx` Deployment in `test-namespace`. It also needs namespace-scoped Deployment
+creation permission for server-side apply; Kubernetes cannot restrict `create`
+by resource name.
+Use a separate namespace-scoped Role with the resources required by your own
+templates when deploying other workloads.
+
 ## How To Get Kubernetes Cluster URL
 
 ```sh

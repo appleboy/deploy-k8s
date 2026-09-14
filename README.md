@@ -1,7 +1,6 @@
 # Deploy K8S Tool
 
 [![Lint and Testing](https://github.com/appleboy/deploy-k8s/actions/workflows/testing.yml/badge.svg?branch=main)](https://github.com/appleboy/deploy-k8s/actions/workflows/testing.yml)
-[![CodeQL](https://github.com/appleboy/deploy-k8s/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/appleboy/deploy-k8s/actions/workflows/codeql.yml)
 [![Security Scan](https://github.com/appleboy/deploy-k8s/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/appleboy/deploy-k8s/actions/workflows/security.yml)
 [![Docker Image](https://github.com/appleboy/deploy-k8s/actions/workflows/docker.yml/badge.svg?branch=main)](https://github.com/appleboy/deploy-k8s/actions/workflows/docker.yml)
 [![Goreleaser](https://github.com/appleboy/deploy-k8s/actions/workflows/goreleaser.yml/badge.svg)](https://github.com/appleboy/deploy-k8s/actions/workflows/goreleaser.yml)

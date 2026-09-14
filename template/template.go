@@ -77,7 +77,7 @@ func GetAllEnviroment() map[string]any {
 }
 
 // NewTemplate returns a string by template.
-func NewTemplate(format string, data map[string]interface{}) ([]byte, error) {
+func NewTemplate(format string, data map[string]any) ([]byte, error) {
 	t, err := template.New("message").Parse(format)
 	if err != nil {
 		return nil, err

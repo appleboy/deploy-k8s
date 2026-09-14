@@ -10,7 +10,7 @@ func TestNewTemplate(t *testing.T) {
 	// Define test input
 	format := "Hello, {{ .envs.name }}! Today is {{ .envs.day }}."
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"name": "John",
 		"day":  "Monday",
 	}
@@ -32,10 +32,10 @@ func TestNewTemplate(t *testing.T) {
 // TestGetAllEnviroment tests the GetAllEnviroment function.
 func TestGetAllEnviroment(t *testing.T) {
 	// Set up test environment variables
-	os.Setenv("PLUGIN_VAR1", "value1")
-	os.Setenv("DRONE_VAR2", "value2")
-	os.Setenv("INPUT_VAR3", "value3")
-	os.Setenv("GITHUB_VAR4", "value4")
+	t.Setenv("PLUGIN_VAR1", "value1")
+	t.Setenv("DRONE_VAR2", "value2")
+	t.Setenv("INPUT_VAR3", "value3")
+	t.Setenv("GITHUB_VAR4", "value4")
 
 	// Call the function being tested
 	result := GetAllEnviroment()
@@ -120,15 +120,11 @@ spec:
 }
 
 func TestParseSet(t *testing.T) {
-	envMap := map[string]interface{}{
+	envMap := map[string]any{
 		"ENV_VAR": "test",
 	}
 
-	tempDir, err := os.MkdirTemp("", "test-templates")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tempDir)
+	tempDir := t.TempDir()
 
 	template1 := []byte(`
 apiVersion: v1
@@ -138,7 +134,7 @@ metadata:
 data:
   key1: {{ .ENV_VAR }}
 `)
-	err = os.WriteFile(filepath.Join(tempDir, "template1.yaml"), template1, 0o644)
+	err := os.WriteFile(filepath.Join(tempDir, "template1.yaml"), template1, 0o644)
 	if err != nil {
 		t.Fatalf("Failed to write template1.yaml: %v", err)
 	}
@@ -186,7 +182,11 @@ metadata:
 
 	obj1 := objects[0]
 	if obj1.TplPath != filepath.Join(tempDir, "template1.yaml") {
-		t.Errorf("Expected TplPath: %s, got: %s", filepath.Join(tempDir, "template1.yaml"), obj1.TplPath)
+		t.Errorf(
+			"Expected TplPath: %s, got: %s",
+			filepath.Join(tempDir, "template1.yaml"),
+			obj1.TplPath,
+		)
 	}
 	if obj1.GVK.Group != "" || obj1.GVK.Version != "v1" || obj1.GVK.Kind != "ConfigMap" {
 		t.Errorf("Expected GVK: v1/ConfigMap, got: %s/%s", obj1.GVK.GroupVersion(), obj1.GVK.Kind)
@@ -194,17 +194,33 @@ metadata:
 
 	obj2 := objects[1]
 	if obj2.TplPath != filepath.Join(tempDir, "template2.yaml") {
-		t.Errorf("Expected TplPath: %s, got: %s", filepath.Join(tempDir, "template2.yaml"), obj2.TplPath)
+		t.Errorf(
+			"Expected TplPath: %s, got: %s",
+			filepath.Join(tempDir, "template2.yaml"),
+			obj2.TplPath,
+		)
 	}
 	if obj2.GVK.Group != "apps" || obj2.GVK.Version != "v1" || obj2.GVK.Kind != "Deployment" {
-		t.Errorf("Expected GVK: apps/v1/Deployment, got: %s/%s", obj2.GVK.GroupVersion(), obj2.GVK.Kind)
+		t.Errorf(
+			"Expected GVK: apps/v1/Deployment, got: %s/%s",
+			obj2.GVK.GroupVersion(),
+			obj2.GVK.Kind,
+		)
 	}
 
 	obj3 := objects[2]
 	if obj3.TplPath != filepath.Join(tempDir, "template2.yaml") {
-		t.Errorf("Expected TplPath: %s, got: %s", filepath.Join(tempDir, "template2.yaml"), obj3.TplPath)
+		t.Errorf(
+			"Expected TplPath: %s, got: %s",
+			filepath.Join(tempDir, "template2.yaml"),
+			obj3.TplPath,
+		)
 	}
 	if obj3.GVK.Group != "" || obj3.GVK.Version != "v1" || obj3.GVK.Kind != "ServiceAccount" {
-		t.Errorf("Expected GVK: v1/ServiceAccount, got: %s/%s", obj3.GVK.GroupVersion(), obj3.GVK.Kind)
+		t.Errorf(
+			"Expected GVK: v1/ServiceAccount, got: %s/%s",
+			obj3.GVK.GroupVersion(),
+			obj3.GVK.Kind,
+		)
 	}
 }

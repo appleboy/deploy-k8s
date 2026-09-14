@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/appleboy/deploy-k8s/config"
@@ -34,10 +35,10 @@ type (
 
 func (p *Plugin) Exec() error {
 	if p.Config.Server == "" {
-		return fmt.Errorf("server is required")
+		return errors.New("server is required")
 	}
 	if p.AuthInfo.Token == "" {
-		return fmt.Errorf("token is required")
+		return errors.New("token is required")
 	}
 
 	// Generate kube config
@@ -63,11 +64,7 @@ func (p *Plugin) Exec() error {
 		return err
 	}
 
-	if err := p.UpdateContainer(restConfig); err != nil {
-		return err
-	}
-
-	return nil
+	return p.UpdateContainer(restConfig)
 }
 
 func (p *Plugin) Apply(cfg *rest.Config) error {
@@ -103,7 +100,9 @@ func (p *Plugin) Apply(cfg *rest.Config) error {
 				if p.Config.Namespace == "" {
 					return fmt.Errorf(
 						"apply resource failed: namespace must be defined, apiVersion=%s, kind=%s, name=%s",
-						v.GVK.GroupVersion().String(), v.GVK.Kind, v.Obj.GetName(),
+						v.GVK.GroupVersion().String(),
+						v.GVK.Kind,
+						v.Obj.GetName(),
 					)
 				}
 				// set default namespace
@@ -142,6 +141,7 @@ func (p *Plugin) Apply(cfg *rest.Config) error {
 			l.Debug().
 				Str("template", v.TplPath).
 				Msg("show resource")
+			//nolint:forbidigo // Debug mode intentionally prints the formatted resource to stdout.
 			fmt.Printf("%s", v.PrettyString())
 		}
 
@@ -183,12 +183,18 @@ func (p *Plugin) UpdateContainer(cfg *rest.Config) error {
 			if err != nil {
 				return err
 			}
-			containers, found, err := unstructured.NestedSlice(result.Object, "spec", "template", "spec", "containers")
+			containers, found, err := unstructured.NestedSlice(
+				result.Object,
+				"spec",
+				"template",
+				"spec",
+				"containers",
+			)
 			if err != nil || !found || containers == nil {
 				return fmt.Errorf("deployment containers not found or error in spec: %v", err)
 			}
 			for index, container := range containers {
-				maps := container.(map[string]interface{})
+				maps := container.(map[string]any)
 				if !array.InSlice(maps["name"].(string), p.Config.Container) {
 					l.Warn().
 						Str("deployment", deployment).
@@ -199,7 +205,7 @@ func (p *Plugin) UpdateContainer(cfg *rest.Config) error {
 				}
 
 				if err := unstructured.SetNestedField(
-					containers[index].(map[string]interface{}),
+					containers[index].(map[string]any),
 					p.Config.Image,
 					"image",
 				); err != nil {

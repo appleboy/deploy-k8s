@@ -65,3 +65,11 @@ clean:
 
 version:
 	@echo $(VERSION)
+
+# CI tools are pinned separately from application dependencies.
+.PHONY: fmt lint
+fmt:
+	$(GO) tool -modfile=tools.go.mod golangci-lint fmt
+
+lint:
+	$(GO) tool -modfile=tools.go.mod golangci-lint run

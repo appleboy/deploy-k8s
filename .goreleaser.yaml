@@ -10,7 +10,6 @@ builds:
   - darwin
   - linux
   - windows
-  - freebsd
   goarch:
   - amd64
   - arm
@@ -40,21 +39,6 @@ builds:
       goarch: arm
       goarm: "7"
     - goos: windows
-      goarch: arm64
-    - goos: freebsd
-      goarch: ppc64le
-    - goos: freebsd
-      goarch: s390x
-    - goos: freebsd
-      goarch: arm
-      goarm: "5"
-    - goos: freebsd
-      goarch: arm
-      goarm: "6"
-    - goos: freebsd
-      goarch: arm
-      goarm: "7"
-    - goos: freebsd
       goarch: arm64
   flags:
   - -trimpath
@@ -98,3 +82,30 @@ release:
   # Templates: allowed
   extra_files:
     - glob: ./**.xz
+
+changelog:
+  use: github
+  groups:
+    - title: Breaking changes
+      regexp: '^.*?[a-z]+(\(.+\))?!:.+$'
+      order: 0
+    - title: Features
+      regexp: '^.*?feat(\(.+\))?!?:.+$'
+      order: 1
+    - title: Bug fixes
+      regexp: '^.*?fix(\(.+\))?!?:.+$'
+      order: 2
+    - title: Enhancements
+      regexp: '^.*?chore(\(.+\))?!?:.+$'
+      order: 3
+    - title: Refactor
+      regexp: '^.*?refactor(\(.+\))?!?:.+$'
+      order: 4
+    - title: Build process updates
+      regexp: '^.*?(build|ci)(\(.+\))?!?:.+$'
+      order: 5
+    - title: Documentation updates
+      regexp: '^.*?docs?(\(.+\))?!?:.+$'
+      order: 6
+    - title: Others
+      order: 999

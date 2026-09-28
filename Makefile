@@ -1,5 +1,6 @@
 EXECUTABLE := deploy-k8s
 GO ?= go
+TOOLS_MOD := -modfile=go.tools.mod
 GOFILES := $(shell find . -name "*.go" -type f)
 HAS_GO = $(shell hash $(GO) > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
 
@@ -69,7 +70,11 @@ version:
 # CI tools are pinned separately from application dependencies.
 .PHONY: fmt lint
 fmt:
-	$(GO) tool -modfile=tools.go.mod golangci-lint fmt
+	$(GO) tool $(TOOLS_MOD) golangci-lint fmt
 
 lint:
-	$(GO) tool -modfile=tools.go.mod golangci-lint run
+	$(GO) tool $(TOOLS_MOD) golangci-lint run
+
+.PHONY: install-tools fmt lint
+install-tools: ## Download pinned Go tools
+	$(GO) mod download $(TOOLS_MOD)
